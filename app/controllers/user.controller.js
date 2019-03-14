@@ -105,7 +105,7 @@ exports.login = function(req, resp) {
                 resp.json(response.message);
             } else {
                 resp.json({
-                    "userId": result.toString(),
+                    "userId": result,
                     "token": authToken
                 });
             }

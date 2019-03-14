@@ -41,7 +41,7 @@ exports.getById = function(req, resp) {
             resp.status(response.responseCode).json(response.message);
         } else {
             let toSend = {username : result.username, email: result.email, givenName: result.given_name, familyName: result.family_name};
-            if (requestingUser == null) {
+            if (requestingUser != id) {
                 delete toSend.email;
             }
             resp.status(response.responseCode).json(toSend);

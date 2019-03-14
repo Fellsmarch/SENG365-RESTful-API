@@ -52,7 +52,7 @@ exports.getById = function(req, resp) {
             resp.status(response.responseCode).json(response.message);
         } else {
             let toSend = {username : result.username, email: result.email, givenName: result.given_name, familyName: result.family_name};
-            if (requestingUser !== id) {
+            if (requestingUser !== id || requestingUser == null) {
                 delete toSend.email;
             }
             resp.status(response.responseCode).json(toSend);

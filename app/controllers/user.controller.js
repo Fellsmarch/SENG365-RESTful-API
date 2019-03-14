@@ -3,17 +3,21 @@ const crypto = require("crypto");
 const auth = require("../util/user.authChecker");
 
 exports.create = function(req, resp) {
-    let username = req.body.username.toString();
-    let email = req.body.email.toString();
-    let givenName = req.body.givenName.toString();
-    let familyName = req.body.familyName.toString();
-    let password = req.body.password.toString();
+    let userData = {
+        username: req.body.username.toString(),
+        email: req.body.email.toString(),
+        givenName: req.body.givenName.toString(),
+        familyName: req.body.familyName.toString()
+    };
 
-    let userData = [username, email, givenName, familyName, password];
+    let password = req.body.password.toString();
 
     for (variable in userData) {
         if (variable == null || variable === "") {
-            resp.status(400).json("'" + variable + "' is not valid input!");
+            resp.statusMessage = "Bad Request";
+            resp.status(400);
+            resp.json("'" + variable + "' is not valid input!");
+            resp.end();
         }
     }
 
@@ -44,18 +48,38 @@ exports.logout = function(req, resp) {
 };
 
 exports.getById = function(req, resp) {
-    let id = req.params.userId;
-    let requestingUser = auth.checkAuth(req.headers["x-authorization"]);
+    let id = Number(req.params.userId);
+    // let requestingUser;
+    // auth.checkAuth(req.headers["x-authorization"], function(userId) {
+    //     requestingUser = userId;
+    // });
 
     User.getOneById(id, function(result, response) {
         if (result == null) {
-            resp.status(response.responseCode).json(response.message);
+            resp.statusMessage = response.message;
+            resp.status(response.responseCode);
+            resp.json({});
+            resp.end();
         } else {
-            let toSend = {username : result.username, email: result.email, givenName: result.given_name, familyName: result.family_name};
-            if (requestingUser !== id || requestingUser == null) {
-                delete toSend.email;
-            }
-            resp.status(response.responseCode).json(toSend);
+            let toSend = {
+                username : result.username,
+                email: result.email,
+                givenName: result.given_name,
+                familyName: result.family_name
+            };
+            auth.checkAuth(req.headers["x-authorization"], function(requestingUser) {
+                if (requestingUser !== id && requestingUser != null) {
+                    delete toSend.email;
+                }
+            });
+            // if (requestingUser !== id || requestingUser == null) {
+            //     delete toSend.email;
+            // }
+            // console.log("Requesting user: " + requestingUser);
+            resp.statusMessage = response.message;
+            resp.status(response.responseCode);
+            resp.json(toSend);
+            resp.end();
         }
     });
 };

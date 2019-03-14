@@ -17,7 +17,6 @@ exports.create = function(req, resp) {
             resp.statusMessage = "Bad Request";
             resp.status(400);
             resp.json("'" + variable + "' is not valid input!");
-            resp.end();
         }
     }
 
@@ -59,7 +58,6 @@ exports.getById = function(req, resp) {
             resp.statusMessage = response.message;
             resp.status(response.responseCode);
             resp.json({});
-            resp.end();
         } else {
             let toSend = {
                 username : result.username,
@@ -68,18 +66,13 @@ exports.getById = function(req, resp) {
                 familyName: result.family_name
             };
             auth.checkAuth(req.headers["x-authorization"], function(requestingUser) {
-                if (requestingUser !== id && requestingUser != null) {
+                if (requestingUser !== id || requestingUser == null) {
                     delete toSend.email;
                 }
+                resp.json(toSend);
             });
-            // if (requestingUser !== id || requestingUser == null) {
-            //     delete toSend.email;
-            // }
-            // console.log("Requesting user: " + requestingUser);
             resp.statusMessage = response.message;
             resp.status(response.responseCode);
-            resp.json(toSend);
-            resp.end();
         }
     });
 };

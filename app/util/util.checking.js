@@ -3,7 +3,7 @@ exports.checkNotEmpty = function(list, callbackFunc) {
     let foundErrors = false;
     for (let i = 0; i < list.length; i++) {
         // console.log(list[i]);
-        if (list[i] === "") {
+        if (list[i] === "" || list[i] == null) {
             // console.log("found");
             foundErrors = true;
         }

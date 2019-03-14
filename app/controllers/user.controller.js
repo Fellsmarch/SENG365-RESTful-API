@@ -5,15 +5,24 @@ const check = require("../util/util.checking");
 const crypto = require("crypto");
 
 exports.create = function(req, resp) {
+    let body = req.body;
     let userData = [
-        req.body.username.toString(),
-        req.body.email.toString(),
-        req.body.givenName.toString(),
-        req.body.familyName.toString()
+        body["username"],
+        body["email"],
+        body["givenName"],
+        body["familyName"]
     ];
 
-    let password = req.body.password.toString();
+    // console.log("s" + userData[0] + "s");
+    // let userData = [
+    //     req.body.username.toString(),
+    //     req.body.email.toString(),
+    //     req.body.givenName.toString(),
+    //     req.body.familyName.toString()
+    // ];
 
+    // let password = req.body.password.toString();
+    let password = body["password"];
 
     // const values = Object.values(userData);
     // for (const value of values) {
@@ -43,6 +52,7 @@ exports.create = function(req, resp) {
                 // resp.json("All required fields present: " + errorsFound + ". Email errors found: " + emailErrors);
                 resp.json("Bad Request");
              } else {
+                for (let i = 0; i < userData.length; i++) userData[i] = userData[i].toString();
                 User.insert(userData.concat(pass.hashPassword(password)), function(result, response) { //Adding the hashed password here to avoid weird async errors
                     resp.statusMessage = response.message;
                     resp.status(response.responseCode)
@@ -100,7 +110,6 @@ exports.login = function(req, resp) {
                 });
             }
         });
-
     }
 };
 

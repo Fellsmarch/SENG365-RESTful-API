@@ -1,4 +1,6 @@
 const User = require("../models/user.model");
+const crypto = require("crypto");
+const responses = require("../util/util.responses");
 
 exports.create = function(req, resp) {
     let username = req.body.username.toString();
@@ -24,10 +26,15 @@ exports.logout = function(req, resp) {
 
 exports.getById = function(req, resp) {
     let id = req.params.userId;
-    User.getOneById(id, function(result, responseCode) {
-        resp.status(responseCode);
-        if (responseCode != 404) {
-            resp.json(result);
+    // let reqAuth = req.header.
+    User.getOneById(id, function(result, response) {
+        if (result == null) {
+            resp.status(response.responseCode).json(response.message);
+        } else {
+            let toSend = {username : result.username, email: result.email, givenName: result.given_name, familyName: result.family_name};
+            // delete toSend.email;
+            // console.log(crypto.randomBytes(16).toString("hex"));
+            resp.status(response.responseCode).json(toSend);
         }
     });
 };

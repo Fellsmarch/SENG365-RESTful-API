@@ -19,8 +19,7 @@ exports.create = function(req, resp) {
         if (result == null) {
             resp.status(response.responseCode).json(response.message);
         } else {
-            console.log(result);
-            resp.status(response.responseCode).send();
+            resp.status(response.responseCode).json(result);
         }
     });
 };

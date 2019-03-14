@@ -3,30 +3,34 @@ const crypto = require("crypto");
 const auth = require("../util/user.authChecker");
 
 exports.create = function(req, resp) {
-    let userData = {
-        username: req.body.username.toString(),
-        email: req.body.email.toString(),
-        givenName: req.body.givenName.toString(),
-        familyName: req.body.familyName.toString()
-    };
+    let userData = [
+        req.body.username.toString(),
+        req.body.email.toString(),
+        req.body.givenName.toString(),
+        req.body.familyName.toString()
+    ];
 
     let password = req.body.password.toString();
 
-    for (variable in userData) {
-        if (variable == null || variable === "") {
+    const values = Object.values(userData);
+    for (const value of values) {
+        if (value == null || value === "") {
             resp.statusMessage = "Bad Request";
             resp.status(400);
-            resp.json("'" + variable + "' is not valid input!");
+            resp.json("'" + value + "' is not valid input!");
         }
     }
 
+    if (password == null || password === "") {
+        resp.statusMessage = "Bad Request";
+        resp.status(400);
+        resp.json("Invalid password");
+    }
 
     let hash = crypto.createHash("sha512");
     hash.update(password);
-    let hashedPassword = hash.digest("hex");
-
-    userData.pop();
-    userData.push(hashedPassword);
+    password = hash.digest("hex");
+    userData.push(password);
 
     User.insert(userData, function(result, response) {
         if (result == null) {
@@ -48,10 +52,6 @@ exports.logout = function(req, resp) {
 
 exports.getById = function(req, resp) {
     let id = Number(req.params.userId);
-    // let requestingUser;
-    // auth.checkAuth(req.headers["x-authorization"], function(userId) {
-    //     requestingUser = userId;
-    // });
 
     User.getOneById(id, function(result, response) {
         if (result == null) {

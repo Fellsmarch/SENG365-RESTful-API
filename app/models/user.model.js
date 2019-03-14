@@ -2,12 +2,13 @@ const db = require("../../config/db");
 const responses = require("../util/util.responses");
 
 exports.insert = function(userData, done) {
-    //TODO: Hash password
-    let values = [userData]; //Might need double brackets
-
-    db.getPool().query("INSERT INTO User VALUES ?", values, function(err, result) {
-        if (err) done(err);
-        else done(result);
+    let values = [[userData]]; //Might need double brackets
+    let query = "INSERT INTO User (username, email, given_name, family_name, password) VALUES ?";
+    db.getPool().query(query, values, function(err, result) {
+        if (err) {
+            console.log(err);
+            done(null, responses._400);
+        } else done(result.insertId, responses._201);
     });
 };
 
@@ -20,8 +21,12 @@ exports.logout = function(done) {
 };
 
 exports.getOneById = function(userId, done) {
-    db.getPool().query("SELECT * FROM User WHERE user_id = ?", userId, function (err, rows) {
-        if (err) done(null, responses._500);
+    let query = "SELECT * FROM User WHERE user_id = ?";
+    db.getPool().query(query, userId, function (err, rows) {
+        if (err) {
+            console.log(err);
+            done(null, responses._500);
+        }
         else if (rows.length < 1) done(null, responses._404);
         else done(rows[0], responses._200);
     });

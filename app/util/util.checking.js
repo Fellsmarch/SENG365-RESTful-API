@@ -13,7 +13,7 @@ exports.checkNotEmpty = function(list, callbackFunc) {
 }
 
 exports.checkPresent = function(item) {
-    return item !== "";
+    return item !== "" && item != null;
 }
 
 exports.checkEmail = function(email, callbackFunc) {

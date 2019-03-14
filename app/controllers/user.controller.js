@@ -70,9 +70,9 @@ exports.create = function(req, resp) {
 exports.login = function(req, resp) {
     let authToken = crypto.randomBytes(16).toString("hex");
 
-    let username = req.body.username;
-    let email = req.body.email;
-    let password = req.body.password;
+    let username = req.body["username"];
+    let email = req.body["email"];
+    let password = req.body["password"];
 
     let usernamePresent = check.checkPresent(username);
     let emailPresent = check.checkPresent(email);

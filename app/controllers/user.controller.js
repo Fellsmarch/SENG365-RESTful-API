@@ -9,16 +9,27 @@ exports.create = function(req, resp) {
     let familyName = req.body.familyName.toString();
     let password = req.body.password.toString();
 
+    let userData = [username, email, givenName, familyName, password];
+
+    for (variable in userData) {
+        if (variable == null || variable === "") {
+            resp.status(400).json("'" + variable + "' is not valid input!");
+        }
+    }
+
+
     let hash = crypto.createHash("sha512");
     hash.update(password);
     let hashedPassword = hash.digest("hex");
 
-    let userData = [username, email, givenName, familyName, hashedPassword];
+    userData.pop();
+    userData.push(hashedPassword);
 
     User.insert(userData, function(result, response) {
         if (result == null) {
             resp.status(response.responseCode).json(response.message);
         } else {
+            console.log(result);
             resp.status(response.responseCode).json(result);
         }
     });

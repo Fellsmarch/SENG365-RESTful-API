@@ -9,7 +9,7 @@ exports.create = function(req, resp) {
     let userData = [username, email, givenName, familyName, password];
 
     User.insert(userData, function(result) {
-        console.log("User.insert:\n" + result);
+        console.log("User.insert:\n" + result);""
         // resp.json(result);
     });
 };
@@ -23,7 +23,10 @@ exports.logout = function(req, resp) {
 };
 
 exports.getById = function(req, resp) {
-    return null;
+    let id = req.params.userId;
+    User.getOneById(id, function(result) {
+        resp.json(result);
+    });
 };
 
 exports.update = function(req, resp) {

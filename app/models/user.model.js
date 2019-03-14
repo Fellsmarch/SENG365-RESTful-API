@@ -20,8 +20,8 @@ exports.logout = function(done) {
 
 exports.getOneById = function(userId, done) {
     db.get_pool().query("SELECT * FROM User WHERE user_id = ?", userId, function (err, rows) {
-        if (err) return done(err);
-        return done(rows);
+        if (err) return done(err, 400);
+        return done(rows, 200);
     });
 }
 

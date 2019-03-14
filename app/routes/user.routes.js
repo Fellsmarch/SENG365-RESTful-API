@@ -13,4 +13,4 @@ module.exports = function (app) {
     app.route(app.rootUrl + "/users/:userId")
         .get(user.getById)
         .patch(user.update);
-}
+};

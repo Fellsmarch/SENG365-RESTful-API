@@ -24,8 +24,11 @@ exports.logout = function(req, resp) {
 
 exports.getById = function(req, resp) {
     let id = req.params.userId;
-    User.getOneById(id, function(result) {
-        resp.json(result);
+    User.getOneById(id, function(result, responseCode) {
+        resp.status(responseCode);
+        if (responseCode != 404) {
+            resp.json(result);
+        }
     });
 };
 

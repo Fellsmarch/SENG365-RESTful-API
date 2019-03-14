@@ -1,4 +1,3 @@
-const responses = require("./util.responses");
 
 exports.checkNotEmpty = function(list, callbackFunc) {
     let foundErrors = false;
@@ -11,6 +10,10 @@ exports.checkNotEmpty = function(list, callbackFunc) {
     }
     
     return callbackFunc(foundErrors);
+}
+
+exports.checkPresent = function(item) {
+    return item !== "";
 }
 
 exports.checkEmail = function(email, callbackFunc) {

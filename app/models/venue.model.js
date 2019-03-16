@@ -1,7 +1,8 @@
 const db = require("../../config/db");
+const responses = require("../util/util.responses");
 
-exports.getMany = function(done) {
-    return null;
+exports.getMany = function(params, done) {
+
 };
 
 exports.insert = function(done) {
@@ -17,5 +18,16 @@ exports.update = function(done) {
 };
 
 exports.getCategories = function(done) {
-    return null;
+    let query = "SELECT * FROM VenueCategory";
+
+    db.getPool().query(query, function(err, rows) {
+        if(err) {
+            console.log("VENUES GET CATEGORIES ERROR: \n" + err);
+            return done(null);
+        } else if (rows.length < 1) {
+            return done(null);
+        } else {
+            return done(rows);
+        }
+    });
 };

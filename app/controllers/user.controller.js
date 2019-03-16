@@ -1,8 +1,8 @@
 const User = require("../models/user.model");
-const pass = require("../util/util.password");
-const auth = require("../util/util.authorization");
-const check = require("../util/util.checking");
-const crypto = require("crypto");
+const Pass = require("../util/util.password");
+const Auth = require("../util/util.authorization");
+const Check = require("../util/util.checking");
+const Crypto = require("crypto");
 
 /**
  * Registers a new user
@@ -19,8 +19,8 @@ exports.create = function(req, resp) {
     ];
     let password = body["password"];
 
-    check.checkNotEmpty(userData.concat(password), function(errorsFound) {
-        check.checkEmail(userData[1], function(emailErrors) {
+    Check.checkNotEmpty(userData.concat(password), function(errorsFound) {
+        Check.checkEmail(userData[1], function(emailErrors) {
             if (errorsFound || emailErrors) {
                 resp.statusMessage = "Bad Request";
                 resp.status(400);
@@ -28,7 +28,7 @@ exports.create = function(req, resp) {
                 resp.json("Bad Request");
              } else {
                 for (let i = 0; i < userData.length; i++) userData[i] = userData[i].toString();
-                User.insert(userData.concat(pass.hashPassword(password)), function(result, response) { //Adding the hashed password here to avoid weird async errors
+                User.insert(userData.concat(Pass.hashPassword(password)), function(result, response) { //Adding the hashed password here to avoid weird async errors
                     resp.statusMessage = response.message;
                     resp.status(response.responseCode);
                     if (result == null) {
@@ -51,7 +51,7 @@ exports.create = function(req, resp) {
  * token for that user; 400 if login unsuccessful
  */
 exports.login = function(req, resp) {
-    let authToken = crypto.randomBytes(16).toString("hex");
+    let authToken = Crypto.randomBytes(16).toString("hex");
 
     let username = req.body["username"];
     let email = req.body["email"];
@@ -73,7 +73,7 @@ exports.login = function(req, resp) {
             usingUsername = false;
         }
 
-        User.login(data, usingUsername, authToken, pass.hashPassword(password), function(result, response) {
+        User.login(data, usingUsername, authToken, Pass.hashPassword(password), function(result, response) {
             resp.statusMessage = response.message;
             resp.status(response.responseCode);
             if (result == null) {
@@ -98,9 +98,9 @@ exports.logout = function(req, resp) {
     let authToken = req.headers["x-authorization"];
 
     if (authToken) {
-        auth.getIdByAuthToken(authToken, function(userId) {
+        Auth.getIdByAuthToken(authToken, function(userId) {
            if (userId) {
-                auth.removeAuthTokenById(userId, function(result, response) {
+                Auth.removeAuthTokenById(userId, function(result, response) {
                     resp.statusMessage = response.message;
                     resp.status(response.responseCode);
                     resp.json(response.message);
@@ -139,7 +139,7 @@ exports.getById = function(req, resp) {
                 "givenName": result.given_name,
                 "familyName": result.family_name
             };
-            auth.getIdByAuthToken(req.headers["x-authorization"], function(requestingUser) {
+            Auth.getIdByAuthToken(req.headers["x-authorization"], function(requestingUser) {
                 if (requestingUser !== id || requestingUser == null) {
                     delete toSend["email"];
                 }
@@ -176,13 +176,13 @@ exports.update = function(req, resp) {
     }
 
     if (userData.password) {
-        userData.password = pass.hashPassword(userData.password);
+        userData.password = Pass.hashPassword(userData.password);
     }
 
     User.getOneById(id, function(result, _) {
         if (result) {
             if (authToken) {
-                auth.getIdByAuthToken(authToken, function(requestingUser) {
+                Auth.getIdByAuthToken(authToken, function(requestingUser) {
                     if (requestingUser) {
                         if (id === requestingUser) {
                             User.update(id, userData, function(response) {

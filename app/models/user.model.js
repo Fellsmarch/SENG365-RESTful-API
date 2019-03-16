@@ -1,6 +1,11 @@
 const db = require("../../config/db");
 const responses = require("../util/util.responses");
 
+/**
+ * Inserts a new user into the database
+ * @param userData the data for the new user
+ * @param done callback function
+ */
 exports.insert = function(userData, done) {
     let values = [[userData]]; //Might need double brackets
     let query = "INSERT INTO User (username, email, given_name, family_name, password) VALUES ?";
@@ -16,6 +21,14 @@ exports.insert = function(userData, done) {
     });
 };
 
+/**
+ * Logs in a user into the database by adding an authorization token to their user row
+ * @param data Either a username or an email
+ * @param usingUsername True if data is a username, false if it is an email
+ * @param authToken The auth token to add to the user
+ * @param password The user's password
+ * @param done Callback function
+ */
 exports.login = function(data, usingUsername, authToken, password, done) {
     let values = [authToken, data];
     let query = "UPDATE User SET auth_token = ? WHERE ";
@@ -45,6 +58,11 @@ exports.login = function(data, usingUsername, authToken, password, done) {
     })
 };
 
+/**
+ * Gets user data from the database given a user id
+ * @param userId The user to find
+ * @param done Callback function
+ */
 exports.getOneById = function(userId, done) {
     let query = "SELECT * FROM User WHERE user_id = ?";
     db.getPool().query(query, userId, function (err, rows) {
@@ -59,6 +77,12 @@ exports.getOneById = function(userId, done) {
     });
 };
 
+/**
+ * Updates a user given a user's id and new user data
+ * @param userId The user id to change
+ * @param userData The data to change
+ * @param done Callback Function
+ */
 exports.update = function(userId, userData, done) {
     let values = [];
     let query = "UPDATE User SET ";
@@ -95,6 +119,12 @@ exports.update = function(userId, userData, done) {
     });
 };
 
+/**
+ * Finds a user given their username or email
+ * @param data Either a username or an email
+ * @param usingUsername True if data is a username and false if it is an email
+ * @param done Callback function, user id of found user is passed in
+ */
 function findByUsernameOrEmail (data, usingUsername, done) {
     let query = "SELECT * FROM User WHERE ";
     if (usingUsername) query += "username = ?";
@@ -112,6 +142,12 @@ function findByUsernameOrEmail (data, usingUsername, done) {
     })
 }
 
+/**
+ * Checks a given password against a users password
+ * @param userId The user's password to check against
+ * @param password The password to check
+ * @param done Callback function, with true passed in if the passwords match
+ */
 function checkPassword (userId, password, done) {
     let query = "SELECT password FROM User WHERE user_id = ?";
 

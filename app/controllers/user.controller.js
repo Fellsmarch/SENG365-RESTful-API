@@ -1,6 +1,6 @@
 const User = require("../models/user.model");
 const pass = require("../util/util.password");
-const auth = require("../util/user.authChecker");
+const auth = require("../util/util.authorization");
 const check = require("../util/util.checking");
 const crypto = require("crypto");
 
@@ -55,11 +55,13 @@ exports.create = function(req, resp) {
                 for (let i = 0; i < userData.length; i++) userData[i] = userData[i].toString();
                 User.insert(userData.concat(pass.hashPassword(password)), function(result, response) { //Adding the hashed password here to avoid weird async errors
                     resp.statusMessage = response.message;
-                    resp.status(response.responseCode)
+                    resp.status(response.responseCode);
                     if (result == null) {
                         resp.json(response.message);
                     } else {
-                        resp.json(result);
+                        resp.json({
+                            "userId": result
+                        });
                     }
                 });
             }
@@ -74,8 +76,6 @@ exports.login = function(req, resp) {
     let email = req.body["email"];
     let password = req.body["password"];
 
-    let usernamePresent = check.checkPresent(username);
-    let emailPresent = check.checkPresent(email);
     let data = null;
     let usingUsername = null;
 
@@ -84,12 +84,13 @@ exports.login = function(req, resp) {
     // console.log("Not email present: " + !emailPresent);
     // console.log("Bot not username present & not email present: " + (!usernamePresent && !emailPresent));
     // console.log("Password present: " + check.checkPresent(password));
-    if ((!usernamePresent && !emailPresent) || !check.checkPresent(password)) {
+    // if ((!usernamePresent && !emailPresent) || !check.checkPresent(password)) {
+    if((!username && !email) || !password) {
         resp.statusMessage = "Bad Request";
         resp.status(400);
         resp.json("Bad Request");
     } else {
-        if (usernamePresent) {
+        if (username) {
             data = username;
             usingUsername = true;
         } else {
@@ -97,7 +98,7 @@ exports.login = function(req, resp) {
             usingUsername = false;
         }
 
-        User.login(data, usingUsername, authToken, function(result, response) {
+        User.login(data, usingUsername, authToken, pass.hashPassword(password), function(result, response) {
             resp.statusMessage = response.message;
             resp.status(response.responseCode);
             if (result == null) {
@@ -114,7 +115,28 @@ exports.login = function(req, resp) {
 };
 
 exports.logout = function(req, resp) {
-    return null;
+    let authToken = req.headers["x-authorization"];
+
+    if (authToken) {
+        auth.getIdByAuthToken(authToken, function(userId) {
+           if (userId) {
+                auth.removeAuthTokenById(userId, function(result, response) {
+                    resp.statusMessage = response.message;
+                    resp.status(response.responseCode);
+                    resp.json(response.message);
+                });
+           } else {
+               resp.statusMessage = "Unauthorized";
+               resp.status(401);
+               resp.json("Unauthorized");
+           }
+        });
+    } else {
+        resp.statusMessage = "Unauthorized";
+        resp.status(401);
+        resp.json("Unauthorized");
+    }
+
 };
 
 exports.getById = function(req, resp) {
@@ -127,14 +149,14 @@ exports.getById = function(req, resp) {
             resp.json({});
         } else {
             let toSend = {
-                username : result.username,
-                email: result.email,
-                givenName: result.given_name,
-                familyName: result.family_name
+                "username" : result.username,
+                "email": result.email,
+                "givenName": result.given_name,
+                "familyName": result.family_name
             };
-            auth.checkAuth(req.headers["x-authorization"], function(requestingUser) {
+            auth.getIdByAuthToken(req.headers["x-authorization"], function(requestingUser) {
                 if (requestingUser !== id || requestingUser == null) {
-                    delete toSend.email;
+                    delete toSend["email"];
                 }
                 resp.json(toSend);
             });
@@ -143,5 +165,51 @@ exports.getById = function(req, resp) {
 };
 
 exports.update = function(req, resp) {
-    return null;
+    let id = Number(req.params.userId);
+    let authToken = req.headers["x-authorization"];
+    let body = req.body;
+    let userData = {
+        givenName: body["givenName"],
+        familyName: body["familyName"],
+        password: body["password"]
+    };
+
+    if (userData.givenName === "" || userData.familyName === "" || typeof userData.password == "number" ||
+        (!userData.givenName && !userData.familyName && !userData.password)) {
+        resp.statusMessage = "Bad Request";
+        resp.status(400);
+        resp.json("Bad Request")
+        return;
+    }
+
+    if (userData.password) {
+        userData.password = pass.hashPassword(userData.password);
+    }
+
+    if (authToken) {
+        auth.getIdByAuthToken(authToken, function(requestingUser) {
+            if (requestingUser) {
+                if (id === requestingUser) {
+                    User.update(id, userData, function(response) {
+                        resp.statusMessage = response.message;
+                        resp.status(response.responseCode);
+                        resp.json(response.message);
+                    });
+                } else {
+                    resp.statusMessage = "Forbidden";
+                    resp.status(403);
+                    resp.json("Forbidden");
+                }
+            } else {
+                resp.statusMessage = "Internal Server Error";
+                resp.status(500);
+                resp.json("Internal Server Error");
+            }
+        });
+    } else {
+        resp.statusMessage = "Unauthorized";
+        resp.status(401);
+        resp.json("Unauthorized")
+    }
+    // auth.getIdByAuthToken(, function(requestingUser) {
 };

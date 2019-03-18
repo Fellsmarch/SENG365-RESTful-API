@@ -16,26 +16,87 @@ exports.getVenues = function(req, resp) {
         myLongitude: req.query["myLongitude"]
     };
 
+    // console.log(req.query);
+
     //Start checking
     let errorFound = false;
 
     //Check if sortBy is one of the available values
-    if (!["STAR_RATING", "COST_RATING", "DISTANCE"].includes(reqData.sortBy)) errorFound = true;
+    if (reqData.sortBy && !(["STAR_RATING", "COST_RATING", "DISTANCE"].includes(reqData.sortBy))) {
+        console.log("Sort by error");
+        errorFound = true;
+    }
 
-    //Check if sortBy is "STAR_RATING" that both myLatitude & myLongitude are present
-    if (!(reqData.sortBy === "STAR_RATING" && reqData.myLatitude && reqData.myLongitude)) errorFound = true;
+    //Check if sortBy is "DISTANCE" that both myLatitude & myLongitude are present
+    if (reqData.sortBy === "DISTANCE") {
+        if (!reqData.myLatitude || !reqData.myLongitude) {
+            console.log("SortBy is DISTANCE but either latitude or longitude are missing");
+            errorFound = true;
+        }
+    }
+
+    if (reqData.minStarRating > 5 || reqData.minStarRating < 1) {
+        errorFound = true;
+    }
+
+    if (reqData.maxCostRating > 4 || reqData.maxCostRating < 0) {
+        errorFound = true;
+    }
 
     //Check that if either myLatitude or myLongitude is present, the other is also
-    if ((reqData.myLongitude && !reqData.myLatitude) || (reqData.myLatitude && !reqData.myLongitude)) errorFound = true;
+    if ((reqData.myLongitude && !reqData.myLatitude) || (reqData.myLatitude && !reqData.myLongitude)) {
+        console.log("Either latitude or longitude is present and the other is missing");
+        errorFound = true;
+    }
+
+    if (!reqData.myLatitude) reqData.myLatitude = 0;
+    if (!reqData.myLongitude) reqData.myLongitude = 0;
 
     if (errorFound) {
+        console.log("error found");
         resp.statusMessage = "Bad Request";
         resp.status(400);
         resp.json("Bad Request");
     } else {
+        Venue.getMany(reqData, function(results) {
+            if (results != null) {
+                let toSend = [];
+                for (let i = 0; i < results.length; i++) {
+                    let row = results[i];
+                    let newObject = {
+                        "venueId": row.venue_id,
+                        "venueName": row.venue_name,
+                        "categoryId": row.category_id,
+                        "city": row.city,
+                        "shortDescription": row.short_description,
+                        "latitude": row.latitude,
+                        "longitude": row.longitude,
+                        "meanStarRating": row.average_star_rating,
+                        "modeCostRating": row.mode_cost_rating,
+                        "primaryPhoto": "HELLO TEST SERVER",
+                        "distance": row.distance
+                    };
 
+                    if (!(reqData.myLatitude && reqData.myLongitude)) {
+                        delete newObject["distance"];
+                    }
+                    toSend.push(newObject);
+                }
+
+                if (reqData.count || reqData.count === 0) toSend = toSend.slice(0, reqData.count);
+                if (reqData.reverseSort) toSend = toSend.reverse();
+
+                console.log(toSend);
+
+                resp.status(200);
+                resp.json(toSend);
+            } else {
+                resp.statusMessage = "Bad Request";
+                resp.status(400);
+                resp.json("Bad Request");
+            }
+        });
     }
-
 };
 
 exports.addVenue = function(req, resp) {

@@ -87,7 +87,9 @@ exports.getVenues = function(req, resp) {
                 if ((reqData.count || reqData.count === 0) && !reqData.startIndex) {
                     toSend = toSend.slice(0, reqData.count);
                 } else if ((reqData.count || reqData.count === 0) && reqData.startIndex) {
-                    toSend = toSend.slice(reqData.startIndex, reqData.startIndex + reqData.count);
+                    // console.log(reqData.startIndex);
+                    // console.log(reqData.startIndex + reqData.count);
+                    toSend = toSend.slice(reqData.startIndex, Number(reqData.startIndex) + Number(reqData.count));
                 } else if (!(reqData.count || reqData.count === 0) && reqData.startIndex) {
                     toSend = toSend.slice(reqData.startIndex);
                 }

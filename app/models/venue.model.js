@@ -23,11 +23,11 @@ exports.getMany = function(params, done) {
     // LEFT JOIN VenuePhoto AS P ON V.venue_id = P.venue_id
     // paramAdded = false;
 
-    if (params.startIndex) {
-        values.push(Number(params.startIndex));
-        query += " WHERE ";
-        query += "V.venue_id > ?";
-    }
+    // if (params.startIndex) {
+    //     values.push(Number(params.startIndex));
+    //     query += " WHERE ";
+    //     query += "V.venue_id > ?";
+    // }
     if (params.city) {
         values.push(params.city);
         if (values.length === 1) query += " WHERE ";

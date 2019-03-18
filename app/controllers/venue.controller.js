@@ -73,7 +73,7 @@ exports.getVenues = function(req, resp) {
                         "longitude": row.longitude,
                         "meanStarRating": row.average_star_rating,
                         "modeCostRating": row.mode_cost_rating,
-                        "primaryPhoto": "HELLO TEST SERVER",
+                        "primaryPhoto": null,
                         "distance": row.distance
                     };
 
@@ -88,7 +88,6 @@ exports.getVenues = function(req, resp) {
 
                 console.log(toSend);
 
-                throw toSend;
                 resp.status(200);
                 resp.json(toSend);
             } else {

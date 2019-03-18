@@ -1,6 +1,7 @@
 const Venue = require("../models/venue.model");
 
 exports.getVenues = function(req, resp) {
+    //TODO: Still need to get photos filename
     let reqData = {
         startIndex: req.query["startIndex"] || 0,
         count: req.query["count"],
@@ -113,6 +114,7 @@ exports.addVenue = function(req, resp) {
 };
 
 exports.getVenueById = function(req, resp) {
+    let venueId = Number(req.params.venueId);
     resp.send();
 };
 

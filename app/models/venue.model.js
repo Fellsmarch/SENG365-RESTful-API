@@ -2,6 +2,7 @@ const db = require("../../config/db");
 const responses = require("../util/util.responses");
 
 exports.getMany = function(params, done) {
+    //TODO: Still need to get photos filename
     let values = [];
     let distance = "(6371 * acos (" +
         "cos(radians(" + params.myLatitude + "))" +
@@ -20,14 +21,6 @@ exports.getMany = function(params, done) {
                         "GROUP BY venue_id)";
     let query = "SELECT *, "  + distance + "FROM Venue V LEFT JOIN " + averagesQuery + " R ON venue_id = r_venue_id";
 
-    // LEFT JOIN VenuePhoto AS P ON V.venue_id = P.venue_id
-    // paramAdded = false;
-
-    // if (params.startIndex) {
-    //     values.push(Number(params.startIndex));
-    //     query += " WHERE ";
-    //     query += "V.venue_id > ?";
-    // }
     if (params.city) {
         values.push(params.city);
         if (values.length === 1) query += " WHERE ";
@@ -64,11 +57,6 @@ exports.getMany = function(params, done) {
         if (values.length > 1) query += " AND ";
         query += "V.admin_id = ?";
     }
-    // if (params.longitude && params.latitude) {
-    //
-    // } else {
-    //     query = "SELECT * " + query;
-    // }
     if (params.sortBy === "STAR_RATING") query += " ORDER BY R.average_star_rating DESC";
     else if (params.sortBy === "COST_RATING") query += " ORDER BY R.mode_cost_rating ASC";
     else if (params.sortBy === "DISTANCE") query += " ORDER BY distance ASC";
@@ -76,30 +64,12 @@ exports.getMany = function(params, done) {
 
     db.getPool().query(query, values, function(err, rows) {
         if (err) {
-            // console.log(query);
-            // console.log(err);
-            // console.log("\n\n");
             console.log("VENUE GET MANY VENUES ERROR: \n" + err);
             done(null);
         } else {
-            // console.log("QUERY SUCCESSFUL: Rows returned:");
-            // console.log(rows);
-            if (rows.length > 0) {
-                // console.log(query);
-            }
             done(rows);
         }
     });
-    // if (params.sortBy) {
-    //     values.push(params.sortBy);
-    //     query += "ORDER BY ?"
-    // }
-
-
-    //Count
-    //result.slice(0, params.count);
-    //ReverseSort
-    //result.reverse();
 };
 
 exports.insert = function(done) {

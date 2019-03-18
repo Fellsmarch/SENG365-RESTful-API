@@ -88,6 +88,7 @@ exports.getVenues = function(req, resp) {
 
                 console.log(toSend);
 
+                throw toSend;
                 resp.status(200);
                 resp.json(toSend);
             } else {

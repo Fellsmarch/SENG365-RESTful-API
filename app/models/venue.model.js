@@ -69,7 +69,7 @@ exports.getMany = function(params, done) {
     // } else {
     //     query = "SELECT * " + query;
     // }
-    if (params.sortBy === "STAR_RATING") query += " ORDER BY R.average_star_rating ASC";
+    if (params.sortBy === "STAR_RATING") query += " ORDER BY R.average_star_rating DESC";
     else if (params.sortBy === "COST_RATING") query += " ORDER BY R.mode_cost_rating ASC";
     else if (params.sortBy === "DISTANCE") query += " ORDER BY distance ASC";
 

@@ -5,7 +5,7 @@ module.exports = function(app) {
         .get(venue.getVenues)
         .post(venue.addVenue);
 
-    app.route(app.rootUrl + "/venues/:userId")
+    app.route(app.rootUrl + "/venues/:venueId")
         .get(venue.getVenueById)
         .patch(venue.editVenue);
 

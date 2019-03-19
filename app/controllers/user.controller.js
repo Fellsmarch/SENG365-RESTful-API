@@ -131,7 +131,7 @@ exports.getById = function(req, resp) {
         resp.statusMessage = response.message;
         resp.status(response.responseCode);
         if (result == null) {
-            resp.json({});
+            resp.json(response.message);
         } else {
             let toSend = {
                 "username" : result.username,

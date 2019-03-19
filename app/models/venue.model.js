@@ -65,9 +65,9 @@ exports.getMany = function(params, done) {
     db.getPool().query(query, values, function(err, rows) {
         if (err) {
             console.log("VENUE GET MANY VENUES ERROR: \n" + err);
-            done(null);
+            return done(null);
         } else {
-            done(rows);
+            return done(rows);
         }
     });
 };
@@ -76,8 +76,57 @@ exports.insert = function(done) {
     return null;
 };
 
-exports.getOne = function(done) {
-    return null;
+exports.getOne = function(venueId, done) {
+    let venueQuery = "SELECT * FROM Venue WHERE venue_id = ?";
+    let adminQuery = "SELECT user_id, username FROM User WHERE user_id = ?";
+    let categoryQuery = "SELECT * FROM VenueCategory WHERE category_id = ?";
+    let photosQuery = "SELECT * FROM VenuePhoto WHERE venue_id = ?";
+
+    db.getPool().query(venueQuery, venueId, function(venueErr, venueRows) {
+        if (venueErr) {
+            console.log("VENUE GET ONE ERROR (VENUE QUERY)\n" + venueErr);
+            return done(null, responses._500);
+        } else if (venueRows.length < 1) {
+            console.log("VENUE GET ONE ERROR: VENUE NOT FOUND ERROR");
+            return done(null, responses._404);
+        } else {
+            // console.log(venueRows);
+            db.getPool().query(adminQuery, venueRows[0]["venue_id"], function(adminErr, adminRows) {
+                if (adminErr) {
+                    console.log("VENUE GET ONE ERROR (ADMIN QUERY)\n" + adminErr);
+                    return done(null, responses._500);
+                } else if (adminRows.length < 1) {
+                    console.log("VENUE GET ONE ERROR: ADMIN/USER NOT FOUND ERROR");
+                    return done(null, responses._404);
+                } else {
+                    db.getPool().query(categoryQuery, venueRows[0]["category_id"], function(categoryErr, categoryRows) {
+                        if (categoryErr) {
+                            console.log("VENUE GET ONE ERROR (CATEGORY QUERY)\n" + categoryErr);
+                            return done(null, responses._500);
+                        } else if (categoryRows.length < 1) {
+                            console.log("VENUE GET ONE ERROR: CATEGORY NOT FOUND ERROR");
+                            return done(null, responses._404);
+                        } else {
+                            db.getPool().query(photosQuery, venueRows[0]["venue_id"], function(photoErr, photoRows) {
+                                if (photoErr) {
+                                    console.log("VENUE GET ONE ERROR (PHOTO QUERY)\n" + photoErr);
+                                    return done(null, responses._500);
+                                } else {
+                                    let toReturn = {
+                                        venueRows: venueRows,
+                                        adminRows: adminRows,
+                                        categoryRows: categoryRows,
+                                        photoRows: photoRows
+                                    };
+                                    return done(toReturn, responses._200);
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    });
 };
 
 exports.update = function(done) {

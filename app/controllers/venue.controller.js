@@ -115,7 +115,46 @@ exports.addVenue = function(req, resp) {
 
 exports.getVenueById = function(req, resp) {
     let venueId = Number(req.params.venueId);
-    resp.send();
+
+    Venue.getOne(venueId, function(result, response) {
+        resp.statusMessage = response.message;
+        resp.status = response.responseCode;
+        if (!result) {
+            resp.json(response.message);
+        } else {
+            console.log(result);
+            let toSend = {
+                "venueName": result.venueRows[0]["venue_name"],
+                "admin": {
+                    "userId": result.adminRows[0]["user_id"],
+                    "username": result.adminRows[0]["username"]},
+                "category": {
+                    "categoryId": result.categoryRows[0]["category_id"],
+                    "categoryName": result.categoryRows[0]["category_name"],
+                    "categoryDescription": result.categoryRows[0]["category_description"]},
+                "city": result.venueRows[0]["city"],
+                "shortDescription": result.venueRows[0]["short_description"],
+                "longDescription": result.venueRows[0]["long_description"],
+                "dateAdded": result.venueRows[0]["date_added"],
+                "address": result.venueRows[0]["address"],
+                "latitude": result.venueRows[0]["latitude"],
+                "longitude": result.venueRows[0]["longitude"],
+                "photos": []
+            };
+
+            for (let i = 0; i < result.photoRows.length; i++) {
+                let toAdd = {
+                    "photoFilename": result.photoRows[i]["photo_filename"],
+                    "photoDescription": result.photoRows[i]["photo_description"],
+                    "isPrimary": (result.photoRows[i]["is_primary"] === 1)
+                };
+                toSend.photos.push(toAdd);
+            }
+
+            resp.json(toSend);
+        }
+    });
+
 };
 
 exports.editVenue = function(req, resp) {

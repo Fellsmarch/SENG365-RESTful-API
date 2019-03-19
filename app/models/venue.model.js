@@ -72,8 +72,42 @@ exports.getMany = function(params, done) {
     });
 };
 
-exports.insert = function(done) {
-    return null;
+exports.insert = function(venueData, adminId, done) {
+    let date = new Date().toJSON().slice(0, 10);
+    let values = [
+        adminId,
+        venueData.categoryId,
+        venueData.venueName,
+        venueData.city,
+        date,
+        venueData.address,
+        venueData.latitude,
+        venueData.longitude
+    ];
+
+    let columns = "(admin_id, category_id, venue_name, city, date_added, address, latitude, longitude";
+
+    if (venueData.shortDescription) {
+        values.push(venueData.shortDescription);
+        columns += ", short_description";
+    }
+    if (venueData.longDescription) {
+        values.push(venueData.longDescription);
+        columns += ", long_description";
+    }
+    columns += ")";
+
+    let query = "INSERT INTO Venue " + columns + " VALUES ?";
+    console.log(query);
+
+    db.getPool().query(query, [[values]], function(err, result) {
+       if (err) {
+           console.log("VENUE INSERT ERROR:\n" + err);
+           done(null, responses._500);
+       } else {
+           done(result.insertId, responses._201);
+       }
+    });
 };
 
 exports.getOne = function(venueId, done) {

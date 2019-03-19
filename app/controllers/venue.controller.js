@@ -1,4 +1,5 @@
 const Venue = require("../models/venue.model");
+const Auth = require("../util/util.authorization");
 
 exports.getVenues = function(req, resp) {
     //TODO: Still need to get photos filename
@@ -110,7 +111,57 @@ exports.getVenues = function(req, resp) {
 };
 
 exports.addVenue = function(req, resp) {
-    resp.send();
+    let newVenue = {
+        venueName: req.body["venueName"],
+        categoryId: req.body["categoryId"],
+        city: req.body["city"],
+        shortDescription: req.body["shortDescription"],
+        longDescription: req.body["longDescription"],
+        address: req.body["address"],
+        latitude: req.body["latitude"],
+        longitude: req.body["longitude"]
+    };
+    let authToken = req.headers["x-authorization"];
+
+    let errorFound = false;
+    if (!newVenue.venueName || !newVenue.categoryId || !newVenue.city
+        || !newVenue.address || !newVenue.latitude || !newVenue.latitude) {
+        errorFound = true;
+    }
+
+    if (newVenue.latitude < -90 || newVenue.latitude > 90) {
+        errorFound = true;
+    }
+
+    if (newVenue.longitude < -180 || newVenue.longitude > 180) {
+        errorFound = true;
+    }
+
+    if (errorFound) {
+        resp.status(400);
+        resp.json("Bad Request");
+    } else {
+        Auth.getIdByAuthToken(authToken, function(adminId) {
+            if (!adminId) {
+                resp.status(401);
+                resp.json("Unauthorized");
+            } else {
+                Venue.insert(newVenue, adminId, function(result, response) {
+                    resp.status(response.responseCode);
+                    if (!result) {
+                        resp.json(response.message);
+                    } else {
+                        resp.json({
+                            "venueId": result
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+
+
 };
 
 exports.getVenueById = function(req, resp) {

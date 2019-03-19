@@ -118,7 +118,8 @@ exports.getVenueById = function(req, resp) {
 
     Venue.getOne(venueId, function(result, response) {
         resp.statusMessage = response.message;
-        resp.status = response.responseCode;
+        resp.status(response.responseCode);
+        console.log(response);
         if (!result) {
             resp.json(response.message);
         } else {
@@ -150,7 +151,6 @@ exports.getVenueById = function(req, resp) {
                 };
                 toSend.photos.push(toAdd);
             }
-
             resp.json(toSend);
         }
     });

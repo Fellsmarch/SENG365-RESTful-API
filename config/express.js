@@ -21,6 +21,7 @@ module.exports = function () {
     require('../app/routes/backdoor.routes')(app);
     require("../app/routes/user.routes")(app);
     require("../app/routes/venue.routes")(app);
+    require("../app/routes/venue.review.routes")(app);
 
     // DEBUG (you can remove this)
     app.get('/', function (req, res) {

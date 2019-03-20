@@ -1,6 +1,11 @@
 const Venue = require("../models/venue.model");
 const Auth = require("../util/util.authorization");
 
+/**
+ * Gets a list of venues that match the given search criteria
+ * @param req
+ * @param resp
+ */
 exports.getVenues = function(req, resp) {
     //TODO: Still need to get photos filename
     let reqData = {
@@ -122,6 +127,8 @@ exports.addVenue = function(req, resp) {
         longitude: req.body["longitude"]
     };
     let authToken = req.headers["x-authorization"];
+
+    console.log(req.body);
 
     let errorFound = false;
     if (!newVenue.venueName || !newVenue.categoryId || !newVenue.city

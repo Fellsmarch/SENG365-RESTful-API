@@ -32,9 +32,9 @@ exports.insert = function(venueId, adminId, reviewData, done) {
     let values = [
         venueId,
         adminId,
-        reviewData["reviewBody"],
-        reviewData["starRating"],
-        reviewData["costRating"],
+        reviewData.body,
+        reviewData.starRating,
+        reviewData.costRating,
         date
     ];
 

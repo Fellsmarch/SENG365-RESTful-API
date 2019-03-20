@@ -32,7 +32,31 @@ exports.addReview = function(req, resp) {
     let venueId = req.params.venueId;
     let authToken = req.headers["x-authorization"];
 
-    if (!req.body["reviewBody"] || !req.body["starRating"] || !req.body["costRating"]) {
+    let reviewData = {
+        body: req.body["reviewBody"],
+        starRating: req.body["starRating"],
+        costRating: req.body["costRating"]
+    };
+
+    let errorsFound = false;
+
+    if (!reviewData.body || !reviewData.starRating || !reviewData.costRating) {
+        errorsFound = true;
+    }
+
+    if (reviewData.starRating < 1 || reviewData.starRating > 5) {
+        errorsFound = true;
+    }
+
+    if (reviewData.costRating < 0 || reviewData.costRating > 4) {
+        errorsFound = true;
+    }
+
+    if (!Number.isInteger(reviewData.starRating) || !Number.isInteger(reviewData.costRating)) {
+        errorsFound = true;
+    }
+
+    if (errorsFound) {
         resp.status(400);
         resp.json("Bad Request");
     } else {
@@ -41,7 +65,7 @@ exports.addReview = function(req, resp) {
                 resp.status(401);
                 resp.json("Unauthorized");
             } else {
-                Review.insert(venueId, adminId, req.body, function(response) {
+                Review.insert(venueId, adminId, reviewData, function(response) {
                     resp.status(response.responseCode);
                     resp.json(response.message);
                 });

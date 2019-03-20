@@ -40,7 +40,7 @@ exports.addReview = function(req, resp) {
 
     let errorsFound = false;
 
-    if (!reviewData.body || !reviewData.starRating || !reviewData.costRating) {
+    if (!reviewData.body || !reviewData.starRating || (!reviewData.costRating && reviewData.costRating !== 0)) {
         console.log("ADD REVIEW FOUND MISSING DATA ERROR: ");
         console.log(reviewData);
         errorsFound = true;

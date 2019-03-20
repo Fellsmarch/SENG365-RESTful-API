@@ -29,7 +29,25 @@ exports.getVenueReviews = function(req, resp) {
 };
 
 exports.addReview = function(req, resp) {
-    resp.send();
+    let venueId = req.params.venueId;
+    let authToken = req.headers["x-authorization"];
+
+    if (!req.body["reviewBody"] || !req.body["starRating"] || !req.body["costRating"]) {
+        resp.status(400);
+        resp.json("Bad Request");
+    }
+
+    Auth.getIdByAuthToken(authToken, function(adminId) {
+        if (!adminId) {
+            resp.status(401);
+            resp.json("Unauthorized");
+        } else {
+            Review.insert(venueId, adminId, req.body, function(response) {
+                resp.status(response.responseCode);
+                resp.json(response.message);
+            });
+        }
+    });
 };
 
 exports.getUsersReviews = function(req, resp) {

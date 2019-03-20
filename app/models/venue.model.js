@@ -103,7 +103,7 @@ exports.insert = function(venueData, adminId, done) {
 
     db.getPool().query(query, [[values]], function(err, result) {
        if (err) {
-           if (err.code === "ER_NO_REFERENCED_ROW_2") {
+           if (err.code === "ER_NO_REFERENCED_ROW_2" || err.code === "ER_NO_REFERENCED_ROW") {
                console.log("VENUE INSERT ERROR CATEGORY ID DOESN'T REFERENCE CORRECTLY");
                done(null, responses._400);
            } else {

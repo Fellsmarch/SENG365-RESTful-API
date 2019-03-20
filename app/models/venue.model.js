@@ -226,7 +226,7 @@ exports.update = function(venueId, adminId, venueData, done) {
             if (authRows[0]["admin_id"] !== adminId) {
                 return done(responses._403);
             } else {
-                db.getPool.query(updateQuery, values, function(updateErr, updateResult) {
+                db.getPool().query(updateQuery, values, function(updateErr, updateResult) {
                    if (updateErr) {
                        console.log("VENUE UPDATE ERROR UPDATE VENUE:\n" + updateErr);
                        return done(responses._500);

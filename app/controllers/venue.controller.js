@@ -223,7 +223,7 @@ exports.editVenue = function(req, resp) {
         longitude: req.body["longitude"]
     };
 
-    console.log(venueData);
+    // console.log(venueData);
 
     Auth.getIdByAuthToken(authToken, function(adminId) {
         if (!adminId) {

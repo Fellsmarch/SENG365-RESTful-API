@@ -1,4 +1,4 @@
-# MySQL scripts for dropping existing tables and recreating the database table structure
+    # MySQL scripts for dropping existing tables and recreating the database table structure
 
 
 ### DROP EVERYTHING ###

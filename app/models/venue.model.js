@@ -168,8 +168,77 @@ exports.getOne = function(venueId, done) {
     });
 };
 
-exports.update = function(done) {
-    return null;
+exports.update = function(venueId, adminId, venueData, done) {
+    let values = [];
+    let updateQuery = "UPDATE Venue SET ";
+
+    if (venueData.venueName) {
+        values.push(venueData.venueName);
+        updateQuery += "venue_name = ?";
+    }
+    if (venueData.categoryId) {
+        values.push(venueData.categoryId);
+        if (values.length > 1) updateQuery += ", ";
+        updateQuery += "category_id = ?";
+    }
+    if (venueData.city) {
+        values.push(venueData.city);
+        if (values.length > 1) updateQuery += ", ";
+        updateQuery += "city = ?";
+    }
+    if (venueData.shortDescription) {
+        values.push(venueData.shortDescription);
+        if (values.length > 1) updateQuery += ", ";
+        updateQuery += "short_description = ?";
+    }
+    if (venueData.longDescription) {
+        values.push(venueData.longDescription);
+        if (values.length > 1) updateQuery += ", ";
+        updateQuery += "long_description = ?";
+    }
+    if (venueData.address) {
+        values.push(venueData.address);
+        if (values.length > 1) updateQuery += ", ";
+        updateQuery += "address = ?";
+    }
+    if (venueData.latitude) {
+        values.push(venueData.latitude);
+        if (values.length > 1) updateQuery += ", ";
+        updateQuery += "latitude = ?";
+    }
+    if (venueData.longitude) {
+        values.push(venueData.longitude);
+        if (values.length > 1) updateQuery += ", ";
+        updateQuery += "longitude = ?";
+    }
+
+    updateQuery += "WHERE venue_id = ?";
+    values.push(venueId);
+
+    let authQuery = "SELECT admin_id FROM Venue WHERE venue_id = ?";
+    db.getPool().query(authQuery, venueId, function(authErr, authRows) {
+        if (authErr) {
+            console.log("VENUE UPDATE ERROR CHECK VALID ADMIN & VENUE:\n" + authErr);
+            return done(responses._500);
+        } else if (authRows.length < 1) {
+            return done(responses._404);
+        } else {
+            if (authRows[0]["admin_id"] !== adminId) {
+                return done(responses._403);
+            } else {
+                db.getPool.query(updateQuery, values, function(updateErr, updateResult) {
+                   if (updateErr) {
+                       console.log("VENUE UPDATE ERROR UPDATE VENUE:\n" + updateErr);
+                       return done(responses._500);
+                   } else if (updateResult["affectedRows"] < 1) {
+                       return done(responses._500);
+                   } else {
+                       return done(responses._200);
+                   }
+                });
+            }
+        }
+    });
 };
 
 exports.getCategories = function(done) {

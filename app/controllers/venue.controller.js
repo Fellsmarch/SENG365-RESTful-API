@@ -209,7 +209,46 @@ exports.getVenueById = function(req, resp) {
 };
 
 exports.editVenue = function(req, resp) {
-    resp.send();
+    let authToken = req.headers["x-authorization"];
+    let venueId = req.params.venueId;
+
+    let venueData = {
+        venueName: req.body["venueName"],
+        categoryId: req.body["categoryId"],
+        city: req.body["city"],
+        shortDescription: req.body["shortDescription"],
+        longDescription: req.body["longDescription"],
+        address: req.body["address"],
+        latitude: req.body["latitude"],
+        longitude: req.body["longitude"]
+    };
+
+    console.log(venueData);
+
+    Auth.getIdByAuthToken(authToken, function(adminId) {
+        if (!adminId) {
+            resp.status(401);
+            resp.json("Unauthorized");
+        } else {
+            let changesFound = false;
+            for (let key in venueData) {
+                if (venueData[key]) {
+                    changesFound = true;
+                }
+            }
+
+            if (!changesFound || (venueData.latitude && (venueData.latitude < -90 || venueData.latitude > 90)) ||
+                (venueData.longitude && (venueData.longitude < -180 || venueData.longitude > 180))) {
+                resp.status(400);
+                resp.json("Bad Request");
+            } else {
+                Venue.update(venueId, adminId, venueData, function (response) {
+                    resp.status(response.responseCode);
+                    resp.json(response.message);
+                });
+            }
+        }
+    });
 };
 
 exports.getCategories = function(req, resp) {

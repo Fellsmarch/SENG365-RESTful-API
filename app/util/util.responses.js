@@ -9,6 +9,7 @@ exports._201 = {responseCode: 201, message: "Created"};
 //400
 exports._400 = {responseCode: 400, message: "Bad Request"};
 exports._401 = {responseCode: 401, message: "Unauthorized"};
+exports._403 = {responseCode: 403, message: "Forbidden"};
 exports._404 = {responseCode: 404, message: "Not Found"};
 
 //500

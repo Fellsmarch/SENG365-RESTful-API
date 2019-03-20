@@ -171,7 +171,7 @@ exports.update = function(req, resp) {
         (!userData.givenName && !userData.familyName && !userData.password)) {
         resp.statusMessage = "Bad Request";
         resp.status(400);
-        resp.json("Bad Request")
+        resp.json("Bad Request");
         return;
     }
 

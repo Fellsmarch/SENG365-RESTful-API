@@ -170,11 +170,11 @@ exports.getVenueById = function(req, resp) {
     Venue.getOne(venueId, function(result, response) {
         resp.statusMessage = response.message;
         resp.status(response.responseCode);
-        console.log(response);
+        // console.log(response);
         if (!result) {
             resp.json(response.message);
         } else {
-            console.log(result);
+            // console.log(result);
             let toSend = {
                 "venueName": result.venueRows[0]["venue_name"],
                 "admin": {

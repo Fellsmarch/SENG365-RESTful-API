@@ -35,19 +35,19 @@ exports.addReview = function(req, resp) {
     if (!req.body["reviewBody"] || !req.body["starRating"] || !req.body["costRating"]) {
         resp.status(400);
         resp.json("Bad Request");
+    } else {
+        Auth.getIdByAuthToken(authToken, function(adminId) {
+            if (!adminId) {
+                resp.status(401);
+                resp.json("Unauthorized");
+            } else {
+                Review.insert(venueId, adminId, req.body, function(response) {
+                    resp.status(response.responseCode);
+                    resp.json(response.message);
+                });
+            }
+        });
     }
-
-    Auth.getIdByAuthToken(authToken, function(adminId) {
-        if (!adminId) {
-            resp.status(401);
-            resp.json("Unauthorized");
-        } else {
-            Review.insert(venueId, adminId, req.body, function(response) {
-                resp.status(response.responseCode);
-                resp.json(response.message);
-            });
-        }
-    });
 };
 
 exports.getUsersReviews = function(req, resp) {

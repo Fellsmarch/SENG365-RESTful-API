@@ -25,14 +25,14 @@ exports.getVenues = function(req, resp) {
 
     //Check if sortBy is one of the available values
     if (reqData.sortBy && !(["STAR_RATING", "COST_RATING", "DISTANCE"].includes(reqData.sortBy))) {
-        console.log("Sort by error");
+        // console.log("Sort by error");
         errorFound = true;
     }
 
     //Check if sortBy is "DISTANCE" that both myLatitude & myLongitude are present
     if (reqData.sortBy === "DISTANCE") {
         if (!reqData.myLatitude || !reqData.myLongitude) {
-            console.log("SortBy is DISTANCE but either latitude or longitude are missing");
+            // console.log("SortBy is DISTANCE but either latitude or longitude are missing");
             errorFound = true;
         }
     }
@@ -47,7 +47,7 @@ exports.getVenues = function(req, resp) {
 
     //Check that if either myLatitude or myLongitude is present, the other is also
     if ((reqData.myLongitude && !reqData.myLatitude) || (reqData.myLatitude && !reqData.myLongitude)) {
-        console.log("Either latitude or longitude is present and the other is missing");
+        // console.log("Either latitude or longitude is present and the other is missing");
         errorFound = true;
     }
 
@@ -55,7 +55,7 @@ exports.getVenues = function(req, resp) {
     if (!reqData.myLongitude) reqData.myLongitude = 0;
 
     if (errorFound) {
-        console.log("error found");
+        // console.log("error found");
         resp.statusMessage = "Bad Request";
         resp.status(400);
         resp.json("Bad Request");
@@ -97,7 +97,7 @@ exports.getVenues = function(req, resp) {
                 }
 
 
-                console.log(toSend);
+                // console.log(toSend);
 
                 resp.status(200);
                 resp.json(toSend);

@@ -212,7 +212,7 @@ exports.update = function(venueId, adminId, venueData, done) {
         updateQuery += "longitude = ?";
     }
 
-    updateQuery += "WHERE venue_id = ?";
+    updateQuery += " WHERE venue_id = ?";
     values.push(venueId);
 
     let authQuery = "SELECT admin_id FROM Venue WHERE venue_id = ?";
@@ -226,7 +226,7 @@ exports.update = function(venueId, adminId, venueData, done) {
             if (authRows[0]["admin_id"] !== adminId) {
                 return done(responses._403);
             } else {
-                db.getPool().query(updateQuery, [[values]], function(updateErr, updateResult) {
+                db.getPool().query(updateQuery, values, function(updateErr, updateResult) {
                    if (updateErr) {
                        console.log("VENUE UPDATE ERROR UPDATE VENUE:\n" + updateErr);
                        console.log("SQL WAS: " + updateErr.sql);

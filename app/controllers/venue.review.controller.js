@@ -41,18 +41,22 @@ exports.addReview = function(req, resp) {
     let errorsFound = false;
 
     if (!reviewData.body || !reviewData.starRating || !reviewData.costRating) {
+        console.log("ADD REVIEW FOUND MISSING DATA ERROR: " + reviewData);
         errorsFound = true;
     }
 
     if (reviewData.starRating < 1 || reviewData.starRating > 5) {
+        console.log("ADD REVIEW STAR RATING OUT OF BOUNDS ERROR: " + reviewData.starRating);
         errorsFound = true;
     }
 
     if (reviewData.costRating < 0 || reviewData.costRating > 4) {
+        console.log("ADD REVIEW COST RATING OUT OF BOUNDS ERROR: " + reviewData.costRating);
         errorsFound = true;
     }
 
     if (!Number.isInteger(reviewData.starRating) || !Number.isInteger(reviewData.costRating)) {
+        console.log("ADD REVIEW STAR/COST RATING NOT AN INTEGER ERROR: " + reviewData.starRating + "/" + reviewData.costRating);
         errorsFound = true;
     }
 
@@ -60,6 +64,7 @@ exports.addReview = function(req, resp) {
         resp.status(400);
         resp.json("Bad Request");
     } else {
+        console.log("ADD REVIEW NO ERRORS FOUND");
         Auth.getIdByAuthToken(authToken, function(adminId) {
             if (!adminId) {
                 resp.status(401);

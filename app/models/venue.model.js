@@ -73,7 +73,8 @@ exports.getMany = function(params, done) {
 };
 
 exports.insert = function(venueData, adminId, done) {
-    let date = new Date().toJSON().slice(0, 10);
+    // let date = new Date().toJSON().slice(0, 10);
+    let date = new Date();
     let values = [
         adminId,
         venueData.categoryId,

@@ -22,6 +22,8 @@ module.exports = function () {
     require("../app/routes/user.routes")(app);
     require("../app/routes/venue.routes")(app);
     require("../app/routes/venue.review.routes")(app);
+    require("../app/routes/user.photos.routes")(app);
+    require("../app/routes/venue.photos.routes")(app);
 
     // DEBUG (you can remove this)
     app.get('/', function (req, res) {

@@ -69,6 +69,7 @@ exports.insert = function(venueId, adminId, reviewData, done) {
 };
 
 exports.getManyByUserId = function(userId, done) {
+    //TODO: Add actual get for primary photo filename
     let query = "SELECT * FROM Review " +
         "JOIN User ON user_id = review_author_id " +
         "JOIN Venue ON reviewed_venue_id = venue_id " +

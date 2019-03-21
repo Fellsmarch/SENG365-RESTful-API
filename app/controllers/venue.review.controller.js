@@ -81,6 +81,7 @@ exports.addReview = function(req, resp) {
 };
 
 exports.getUsersReviews = function(req, resp) {
+    //TODO: Add actual get for primary photo filename
     let userId = req.params.userId;
     let authToken = req.headers["x-authorization"];
 

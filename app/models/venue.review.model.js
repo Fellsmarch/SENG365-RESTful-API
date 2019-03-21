@@ -17,8 +17,6 @@ exports.getManyByVenueId = function(venueId, done) {
            return done(rows, responses._200);
        }
     });
-
-
 };
 
 exports.insert = function(venueId, adminId, reviewData, done) {
@@ -70,7 +68,22 @@ exports.insert = function(venueId, adminId, reviewData, done) {
     });
 };
 
-exports.getManyByUserId = function(done) {
-    return null;
+exports.getManyByUserId = function(userId, done) {
+    let query = "SELECT * FROM Review " +
+        "JOIN User ON user_id = review_author_id " +
+        "JOIN Venue ON reviewed_venue_id = venue_id " +
+        "WHERE user_id = ? " +
+        "ORDER BY time_posted DESC";
+
+    db.getPool().query(query, userId, function(err, rows) {
+        if (err) {
+            console.log("REVIEWS GET MANY BY USER ID ERROR:\n" + err);
+            return done(null, responses._500);
+        } else if (rows.length < 1) {
+            return done(null, responses._404);
+        } else {
+            return done(rows, responses._200);
+        }
+    });
 };
 

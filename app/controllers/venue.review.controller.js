@@ -81,5 +81,44 @@ exports.addReview = function(req, resp) {
 };
 
 exports.getUsersReviews = function(req, resp) {
-    resp.send();
+    let userId = req.params.userId;
+    let authToken = req.headers["x-authorization"];
+
+    Auth.getIdByAuthToken(authToken, function(loggedInUserId) {
+        if (!loggedInUserId) {
+            resp.status(401);
+            resp.json("Unauthorized");
+        } else {
+            Review.getManyByUserId(userId, function(result, response) {
+                resp.status(response.responseCode);
+                if (!result) {
+                    resp.json(response.message);
+                } else {
+                    let toSend = [];
+                    for (let i = 0; i < result.length; i++) {
+                        let row = result[i];
+                        let newObject = {
+                            "reviewAuthor": {
+                                "userId": row["user_id"],
+                                "username": row["username"]},
+                            "reviewBody": row["review_body"],
+                            "starRating": row["star_rating"],
+                            "costRating": row["cost_rating"],
+                            "timePosted": row["time_posted"],
+                            "venue": {
+                                "venueId": row["venue_id"],
+                                "venueName": row["venue_name"],
+                                "categoryName": row["category_name"],
+                                "city": row["city"],
+                                "shortDescription": row["short_description"],
+                                "primaryPhoto": null
+                            }
+                        };
+                        toSend.push(newObject);
+                    }
+                    resp.json(toSend);
+                }
+            });
+        }
+    });
 };

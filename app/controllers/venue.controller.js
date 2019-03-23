@@ -127,10 +127,8 @@ exports.addVenue = function(req, resp) {
         longitude: req.body["longitude"]
     };
     let authToken = req.headers["x-authorization"];
-
-    console.log(req.body);
-
     let errorFound = false;
+
     if (!newVenue.venueName || !newVenue.categoryId || !newVenue.city
         || !newVenue.address || !newVenue.latitude || !newVenue.latitude) {
         errorFound = true;

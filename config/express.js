@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const fs = require("fs");
 
 const allowCrossOriginRequests = function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -16,6 +17,9 @@ module.exports = function () {
     app.use(allowCrossOriginRequests);
     app.use(bodyParser.json());
     app.use(bodyParser.raw({ type: 'text/plain' }));  // for the /executeSql endpoint
+    app.use(bodyParser.raw({ type: 'image/jpeg'}));
+    app.use(bodyParser.raw({ type: 'image/png'}));
+    app.use(bodyParser.urlencoded({extended : true}));
 
     // ROUTES
     require('../app/routes/backdoor.routes')(app);
@@ -24,6 +28,15 @@ module.exports = function () {
     require("../app/routes/venue.review.routes")(app);
     require("../app/routes/user.photos.routes")(app);
     require("../app/routes/venue.photos.routes")(app);
+
+    if (fs.existsSync('app/photos')) {
+    } else {
+        fs.mkdir('app/photos', {recursive: true }, (err) => {
+            if (err) {
+                console.log("ERROR CREATING APP/PHOTOS DIRECTORY");
+            }
+        });
+    }
 
     // DEBUG (you can remove this)
     app.get('/', function (req, res) {

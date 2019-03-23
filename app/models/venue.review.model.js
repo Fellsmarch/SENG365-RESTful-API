@@ -46,7 +46,7 @@ exports.insert = function(venueId, adminId, reviewData, done) {
             db.getPool().query(authorCheckQuery, [venueId, adminId], function(authorErr, authorRows) {
                if (authorErr) {
                    console.log("REVIEW INSERT AUTHOR CHECK ERROR:\n" + authorErr);
-                   console.log("QUERY: " + authorErr.sql);
+                   // console.log("QUERY: " + authorErr.sql);
                    return done(responses._500);
                } else if (authorRows.length >= 1) {
                    return done(responses._403);

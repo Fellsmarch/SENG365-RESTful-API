@@ -15,3 +15,7 @@ exports._404 = {responseCode: 404, message: "Not Found"};
 //500
 exports._500 = {responseCode: 500, message: "Internal Server Error"};
 
+exports.sendResponse = function(resp, response) {
+    resp.status(response.responseCode);
+    resp.json(response.message);
+};

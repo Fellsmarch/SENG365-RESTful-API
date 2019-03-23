@@ -33,6 +33,7 @@ module.exports = function () {
     require("../app/routes/user.photos.routes")(app);
     require("../app/routes/venue.photos.routes")(app);
 
+    //Creates the app/photos folder if it does not exist
     if (!fs.existsSync('app/photos')) {
         fs.mkdir('app/photos', {recursive: true }, (err) => {
             if (err) {
@@ -40,11 +41,6 @@ module.exports = function () {
             }
         });
     }
-
-    // DEBUG (you can remove this)
-    app.get('/', function (req, res) {
-        res.send({ 'message': 'Hello World!' })
-    });
 
     return app;
 };

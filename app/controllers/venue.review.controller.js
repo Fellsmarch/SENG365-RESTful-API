@@ -1,6 +1,11 @@
 const Review = require("../models/venue.review.model");
 const Auth = require("../util/util.authorization");
 
+/**
+ *
+ * @param req
+ * @param resp
+ */
 exports.getVenueReviews = function(req, resp) {
     let venueId = req.params.venueId;
 

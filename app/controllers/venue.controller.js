@@ -3,8 +3,14 @@ const Auth = require("../util/util.authorization");
 
 /**
  * Gets a list of venues that match the given search criteria
- * @param req
- * @param resp
+ * @param req The request; containing startIndex: index to start returning results from; count: the total number of
+ * results to return; city: only return venues in this city; searchTerm: only return venues with the searchTerm in their
+ * title; categoryId: only return venues with this categoryId; minStarRating: only return venues that have at least this
+ * average star rating; maxCostRating: only return venues that have at most this (mode) cost rating; adminId: only return
+ * venues whose adminId matches this; sortBy: the property to sort by; reverseSort: whether to return the result in reverse;
+ * myLatitude & myLongitude: the requester's latitude and longitude
+ * @param resp The response; 200 with the requested formatted results if no errors found and 400 if required request data
+ * is missing or invalid
  */
 exports.getVenues = function(req, resp) {
     //TODO: Still need to get photos filename
@@ -23,8 +29,6 @@ exports.getVenues = function(req, resp) {
         myLatitude: req.query["myLatitude"],
         myLongitude: req.query["myLongitude"]
     };
-
-    // console.log(req.query);
 
     //Start checking
     let errorFound = false;
@@ -117,6 +121,14 @@ exports.getVenues = function(req, resp) {
     }
 };
 
+/**
+ * Adds a new venue to the database
+ * @param req The request containing the venue name; categoryId of the category of the venue; the city the venue is
+ * located in; short & long descriptions of the venue; address of the venue; latitude and longitude of the venue and
+ * the authToken of the user that is creating the venue
+ * @param resp The response; 201 if the venue was successfully created; 400 if required request data was missing or request
+ * data was invalid and 401 if the authToken is missing or invalid
+ */
 exports.addVenue = function(req, resp) {
     let newVenue = {
         venueName: req.body["venueName"],
@@ -166,11 +178,14 @@ exports.addVenue = function(req, resp) {
             }
         });
     }
-
-
-
 };
 
+/**
+ * Gets a single venue by venue id
+ * @param req The request containing the venue id to return as a parameter
+ * @param resp The response; 200 if successful with all the information about the requested venue and 404 if the venue id
+ * does not match a venue in the database
+ */
 exports.getVenueById = function(req, resp) {
     let venueId = Number(req.params.venueId);
 
@@ -212,9 +227,17 @@ exports.getVenueById = function(req, resp) {
             resp.json(toSend);
         }
     });
-
 };
 
+/**
+ * Changes a venues details
+ * @param req The request containing the venue id to change; an authToken representing the editing user; and the data to
+ * change: the new venue name, the new category id, the new city the venue is in, the new short/long description, the
+ * address or the new latitude/longitude
+ * @param resp The response; 200 if the changes were successful; 400 if the request data was invalid; 401 if the authToken
+ * was invalid or missing; 403 if the authToken matches a user that is not the venue admin; 404 if the venue was not found
+ * in the database
+ */
 exports.editVenue = function(req, resp) {
     let authToken = req.headers["x-authorization"];
     let venueId = req.params.venueId;
@@ -229,8 +252,6 @@ exports.editVenue = function(req, resp) {
         latitude: req.body["latitude"],
         longitude: req.body["longitude"]
     };
-
-    // console.log(venueData);
 
     Auth.getIdByAuthToken(authToken, function(adminId) {
         if (!adminId) {
@@ -258,6 +279,11 @@ exports.editVenue = function(req, resp) {
     });
 };
 
+/**
+ * Retrieves all information about all venue categories
+ * @param req The request containing nothing
+ * @param resp The response; 200 if successful, containing all the information
+ */
 exports.getCategories = function(req, resp) {
     Venue.getCategories(function(result) {
         let toReturn = [];

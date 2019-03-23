@@ -128,7 +128,7 @@ exports.deleteVenuePhoto = function(req, resp) {
 exports.setPrimaryPhoto = function(req, resp) {
     let venueId = req.params.venueId;
     let filename = req.params.photoFilename;
-    let authToken = req.header["x-authorization"];
+    let authToken = req.headers["x-authorization"];
 
     Auth.getIdByAuthToken(authToken, function(authorizedId) {
         if (!authorizedId) {

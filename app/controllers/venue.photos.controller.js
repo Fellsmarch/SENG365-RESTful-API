@@ -62,13 +62,81 @@ exports.addVenuePhoto = function(req, resp) {
 };
 
 exports.getVenuePhoto = function(req, resp) {
-    resp.send();
+    let venueId = Number(req.params.venueId);
+    let filename = req.params.photoFilename;
+
+    VenuePhoto.getPhoto(venueId, filename, function(rows) {
+        if (rows == null) {
+            Response.sendResponse(resp, 500);
+        } else if (rows.length < 1) {
+            Response.sendResponse(resp, 404);
+        } else {
+            let suffix = filename.substring(filename.length - 3);
+            let contentType;
+
+            if (suffix === "png") {
+                contentType = "image/png";
+            } else {
+                contentType = "image/jpeg";
+            }
+
+            fs.readFile(photoDir + filename, function(err, data) {
+                if (err) {
+                    console.log("VENUE PHOTO GET USER PHOTO READ FILE ERROR:\n" + err);
+                    Response.sendResponse(resp, 500)
+                } else {
+                    resp.writeHead(200, {"Content-Type": contentType});
+                    resp.write(data);
+                    resp.end();
+                }
+            });
+        }
+    });
 };
 
 exports.deleteVenuePhoto = function(req, resp) {
-    resp.send();
+    let venueId = Number(req.params.venueId);
+    let filename = req.params.photoFilename;
+    let authToken = req.headers["x-authorization"];
+
+    Auth.getIdByAuthToken(authToken, function(authorizedId) {
+        if (!authorizedId) {
+            Response.sendResponse(resp, 401);
+        }
+
+        VenuePhoto.getPhoto(venueId, filename, function(rows) {
+            if (rows == null) {
+                Response.sendResponse(resp, 500);
+            } else if (rows.length < 1) {
+                Response.sendResponse(resp, 404);
+            } else {
+                fs.unlink(photoDir + filename, function(err) {
+                    if (err) {
+                        console.log("VENUE PHOTOS ERROR DELETING FILE");
+                    } else {
+                        VenuePhoto.deletePhoto(venueId, filename, authorizedId, function(responseCode) {
+                            Response.sendResponse(resp, responseCode);
+                        });
+                    }
+                });
+            }
+        });
+    });
+
 };
 
 exports.setPrimaryPhoto = function(req, resp) {
-    resp.send();
+    let venueId = req.params.venueId;
+    let filename = req.params.photoFilename;
+    let authToken = req.header["x-authorization"];
+
+    Auth.getIdByAuthToken(authToken, function(authorizedId) {
+        if (!authorizedId) {
+            Response.sendResponse(resp, 401);
+        }
+
+        VenuePhoto.updatePrimaryPhoto(venueId, filename, authorizedId, function(responseCode) {
+            Response.sendResponse(resp, responseCode);
+        });
+    });
 };

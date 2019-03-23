@@ -1,6 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require("fs");
+const multer = require('multer');
+const storage = multer.memoryStorage();
+const upload = multer({storage: storage});
 
 const allowCrossOriginRequests = function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -20,6 +23,7 @@ module.exports = function () {
     app.use(bodyParser.raw({ type: 'image/jpeg'}));
     app.use(bodyParser.raw({ type: 'image/png'}));
     app.use(bodyParser.urlencoded({extended : true}));
+    app.use(upload.single('photo'));
 
     // ROUTES
     require('../app/routes/backdoor.routes')(app);
@@ -29,8 +33,7 @@ module.exports = function () {
     require("../app/routes/user.photos.routes")(app);
     require("../app/routes/venue.photos.routes")(app);
 
-    if (fs.existsSync('app/photos')) {
-    } else {
+    if (!fs.existsSync('app/photos')) {
         fs.mkdir('app/photos', {recursive: true }, (err) => {
             if (err) {
                 console.log("ERROR CREATING APP/PHOTOS DIRECTORY");

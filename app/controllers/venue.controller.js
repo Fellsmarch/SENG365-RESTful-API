@@ -8,6 +8,7 @@ const Auth = require("../util/util.authorization");
  */
 exports.getVenues = function(req, resp) {
     //TODO: Still need to get photos filename
+    //TODO: Change it so latitude/longitude can be 0
     let reqData = {
         startIndex: req.query["startIndex"] || 0,
         count: req.query["count"],
@@ -84,6 +85,7 @@ exports.getVenues = function(req, resp) {
                         "distance": row.distance
                     };
 
+                    //TODO: What if they put in 0?
                     if (!(reqData.myLatitude && reqData.myLongitude)) {
                         delete newObject["distance"];
                     }

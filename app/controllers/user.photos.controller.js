@@ -4,6 +4,7 @@ const fs = require("fs");
 const User = require("../models/user.model");
 const photoDir = "app/photos/";
 const Responses = require("../util/util.responses");
+const Photos = require("../util/util.photos");
 
 exports.getUserPhoto = function(req, resp) {
     let userId = Number(req.params.userId);
@@ -69,7 +70,7 @@ exports.setUserPhoto = function(req, resp) {
                             resp.status(403);
                             resp.json("Forbidden");
                         } else {
-                            let filename = generateFilename();
+                            let filename = Photos.generateFilename();
 
                             if (imageType === "image/png" || imageType === "image/jpeg") {
                                 if (imageType === "image/png") {
@@ -142,6 +143,3 @@ exports.deleteUserPhoto = function(req, resp) {
 };
 
 
-function generateFilename() {
-    return "" + Math.random().toString(36).substring(2, 18);
-}

@@ -35,9 +35,9 @@ exports.deleteUserPhoto = function(userId, done) {
     db.getPool().query(query, userId, function(err, result) {
         if (err) {
             console.log("USER PHOTO DELETE USER PHOTO ERROR:\n" + err);
-            done(responses._500);
+            return done(responses._500);
         } else {
-            done(responses._200);
+            return done(responses._200);
         }
     });
 };

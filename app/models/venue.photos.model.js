@@ -1,6 +1,15 @@
 const db = require("../../config/db");
 const responses = require("../util/util.responses");
 
+/**
+ * Inserts a photo for a venue into the database
+ * @param venueId The id of the venue to associate the photo with
+ * @param authorizedId The id of the user requesting to insert (needs to be the admin of the venue)
+ * @param description The photo description
+ * @param makePrimary True if the photo should be the primary photo, false if not
+ * @param filename The file name of the photo
+ * @param done The callback function
+ */
 exports.insertPhoto = function(venueId, authorizedId, description, makePrimary, filename, done) {
     let getQuery = "SELECT admin_id FROM Venue WHERE venue_id = ?";
     let updateQuery = "UPDATE VenuePhoto SET is_primary = 0 WHERE is_primary = 1";
@@ -67,10 +76,14 @@ exports.insertPhoto = function(venueId, authorizedId, description, makePrimary, 
             }
         });
     });
-
-
 };
 
+/**
+ * Gets a venue's photo from the database
+ * @param venueId The id of the associated venue
+ * @param filename The filename of the photo to retrieve
+ * @param done The callback function
+ */
 exports.getPhoto = function(venueId, filename, done) {
     let query = "SELECT * FROM VenuePhoto WHERE venue_id = ? AND photo_filename = ?";
 
@@ -84,6 +97,13 @@ exports.getPhoto = function(venueId, filename, done) {
     })
 };
 
+/**
+ * Deletes a venue photo from the database
+ * @param venueId The id of the associated venue
+ * @param filename The filename of the photo
+ * @param adminId The id of the user trying to delete the photo (must match the admin_id of the venue)
+ * @param done The callback function
+ */
 exports.deletePhoto = function(venueId, filename, adminId, done) {
     let adminQuery = "SELECT admin_id FROM Venue WHERE venue_id = ?";
     let deleteQuery = "DELETE FROM VenuePhoto WHERE venue_id = ? AND photo_filename = ?";
@@ -107,6 +127,13 @@ exports.deletePhoto = function(venueId, filename, adminId, done) {
     });
 };
 
+/**
+ * Changes the primary photo of a venue
+ * @param venueId The id of the venue
+ * @param filename The filename of the photo to make primary
+ * @param adminId The user trying to change the primary photo (must be the same as the admin of the venue)
+ * @param done The callback function
+ */
 exports.updatePrimaryPhoto = function(venueId, filename, adminId, done) {
     let adminQuery = "SELECT admin_id FROM Venue WHERE venue_id = ?";
     let updateQuery = "UPDATE VenuePhoto SET is_primary = 0 WHERE is_primary = 1";

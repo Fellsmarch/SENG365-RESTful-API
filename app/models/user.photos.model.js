@@ -1,6 +1,12 @@
 const db = require("../../config/db");
 const responses = require("../util/util.responses");
 
+/**
+ * Changes a user's photo or puts a photo into that user's row
+ * @param filename The filename of the photo
+ * @param userId The user to add the photo to
+ * @param done The callback function
+ */
 exports.saveUserPhoto = function(filename, userId, done) {
     let existingPhotoQuery = "SELECT profile_photo_filename AS photo FROM User WHERE user_id = ?";
     let existingPhoto;
@@ -29,6 +35,11 @@ exports.saveUserPhoto = function(filename, userId, done) {
     });
 };
 
+/**
+ * Deletes a user's photo from their row
+ * @param userId The id of the user to delete the photo from
+ * @param done The callback function
+ */
 exports.deleteUserPhoto = function(userId, done) {
     let query = "UPDATE User SET profile_photo_filename = NULL WHERE user_id = ?";
 

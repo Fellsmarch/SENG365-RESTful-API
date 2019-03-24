@@ -1,6 +1,11 @@
 const db = require("../../config/db");
 const responses = require("../util/util.responses");
 
+/**
+ * Retrieves (possibly) multiple venues from the database matching given search parameters
+ * @param params The search parameters
+ * @param done The callback function
+ */
 exports.getMany = function(params, done) {
     //TODO: Still need to get photos filename
     let values = [];
@@ -72,6 +77,12 @@ exports.getMany = function(params, done) {
     });
 };
 
+/**
+ * Inserts a new venue into the database
+ * @param venueData The data about the venue
+ * @param adminId The admin of the venue
+ * @param done The callback function
+ */
 exports.insert = function(venueData, adminId, done) {
     // let date = new Date().toJSON().slice(0, 10);
     let date = new Date();
@@ -116,6 +127,11 @@ exports.insert = function(venueData, adminId, done) {
     });
 };
 
+/**
+ * Gets one venue from the database
+ * @param venueId The id of the venue to get
+ * @param done The callback function
+ */
 exports.getOne = function(venueId, done) {
     let venueQuery = "SELECT * FROM Venue WHERE venue_id = ?";
     let adminQuery = "SELECT user_id, username FROM User WHERE user_id = ?";
@@ -169,6 +185,13 @@ exports.getOne = function(venueId, done) {
     });
 };
 
+/**
+ * Updates a venue in the databse
+ * @param venueId The id of the venue to update
+ * @param adminId The editing user (should match the admin_id of the venue)
+ * @param venueData The new data for the venue
+ * @param done The callback function
+ */
 exports.update = function(venueId, adminId, venueData, done) {
     let values = [];
     let updateQuery = "UPDATE Venue SET ";
@@ -243,6 +266,10 @@ exports.update = function(venueId, adminId, venueData, done) {
     });
 };
 
+/**
+ * Gets all categories for venues
+ * @param done The callback function
+ */
 exports.getCategories = function(done) {
     let query = "SELECT * FROM VenueCategory";
 

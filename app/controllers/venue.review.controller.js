@@ -2,9 +2,10 @@ const Review = require("../models/venue.review.model");
 const Auth = require("../util/util.authorization");
 
 /**
- *
- * @param req
- * @param resp
+ * Gets all of a venue's reviews
+ * @param req The request containing the venue's id as a parameter
+ * @param resp The response; 200 with the review information if successful; 404 if the venue was not found or if the venue
+ * has no reviews
  */
 exports.getVenueReviews = function(req, resp) {
     let venueId = req.params.venueId;
@@ -33,6 +34,14 @@ exports.getVenueReviews = function(req, resp) {
     });
 };
 
+/**
+ * Adds a review to the venue
+ * @param req The request containing the venue's id to add the review to; an authToken of the user creating the review
+ *  and the review information
+ * @param resp The response; 201 if the review was successfully created; 400 if the review's information was invalid;
+ * 401 if the authToken is invalid or missing; 403 if the user has reviewed the venue before or if they are admin of the
+ * venue; 404 if the venue was not in the database
+ */
 exports.addReview = function(req, resp) {
     let venueId = req.params.venueId;
     let authToken = req.headers["x-authorization"];
@@ -84,6 +93,12 @@ exports.addReview = function(req, resp) {
     }
 };
 
+/**
+ * Gets all of a user's reviews
+ * @param req The request containing the user id as a parameter and an authToken of the requesting user
+ * @param resp The response; 200 with all the user's review data is successful; 401 if the requesting user is not the
+ * user requesting reviews from; 404 if the user was not in the database
+ */
 exports.getUsersReviews = function(req, resp) {
     //TODO: Add actual get for primary photo filename
     let userId = req.params.userId;

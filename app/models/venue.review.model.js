@@ -1,6 +1,11 @@
 const db = require("../../config/db");
 const responses = require("../util/util.responses");
 
+/**
+ * Retrieves all reviews of a venue by venue id
+ * @param venueId The id of the venue
+ * @param done The callback function
+ */
 exports.getManyByVenueId = function(venueId, done) {
     let query = "SELECT user_id, username, review_body, star_rating, cost_rating, time_posted FROM Review " +
         "JOIN User ON user_id = review_author_id " +
@@ -19,6 +24,13 @@ exports.getManyByVenueId = function(venueId, done) {
     });
 };
 
+/**
+ * Insert a new review for the venue
+ * @param venueId The id of the venue to add the review to
+ * @param adminId The user trying to add a new review to the venue (cannot be the admin of the venue)
+ * @param reviewData The information about the review
+ * @param done The callback function
+ */
 exports.insert = function(venueId, adminId, reviewData, done) {
     let adminCheckQuery = "SELECT admin_id FROM Venue WHERE venue_id = ?";
     let authorCheckQuery = "SELECT * FROM Review WHERE reviewed_venue_id = ? AND review_author_id = ?";
@@ -68,6 +80,11 @@ exports.insert = function(venueId, adminId, reviewData, done) {
     });
 };
 
+/**
+ * Retrieves all of a user's reviews
+ * @param userId The id of the user
+ * @param done The callback function
+ */
 exports.getManyByUserId = function(userId, done) {
     //TODO: Add actual get for primary photo filename
     let query = "SELECT * FROM Review " +

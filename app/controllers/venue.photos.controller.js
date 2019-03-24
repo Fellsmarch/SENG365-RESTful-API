@@ -40,8 +40,6 @@ exports.addVenuePhoto = function(req, resp) {
 
     if (errorFound) {
         Response.sendResponse(resp, 400);
-        // resp.status(400);
-        // resp.json("Bad Request");
     }
 
     Auth.getIdByAuthToken(authToken, function(authorizedId) {

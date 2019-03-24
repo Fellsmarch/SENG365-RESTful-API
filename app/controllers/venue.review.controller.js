@@ -1,5 +1,7 @@
 const Review = require("../models/venue.review.model");
 const Auth = require("../util/util.authorization");
+const Responses = require("../util/util.responses");
+
 
 /**
  * Gets all of a venue's reviews
@@ -11,9 +13,8 @@ exports.getVenueReviews = function(req, resp) {
     let venueId = req.params.venueId;
 
     Review.getManyByVenueId(venueId, function(result, response) {
-        resp.status(response.responseCode);
         if (!result) {
-            resp.json(response.message);
+            Responses.sendResponse(resp, response);
         } else {
             let toSend = [];
             for (let i = 0; i < result.length; i++) {
@@ -29,7 +30,7 @@ exports.getVenueReviews = function(req, resp) {
                 };
                 toSend.push(newObject);
             }
-            resp.json(toSend);
+            Responses.sendJsonResponse(resp, response, toSend);
         }
     });
 };
@@ -55,38 +56,30 @@ exports.addReview = function(req, resp) {
     let errorsFound = false;
 
     if (!reviewData.body || !reviewData.starRating || (!reviewData.costRating && reviewData.costRating !== 0)) {
-        // console.log("ADD REVIEW FOUND MISSING DATA ERROR: ");
-        // console.log(reviewData);
         errorsFound = true;
     }
 
     if (reviewData.starRating < 1 || reviewData.starRating > 5) {
-        // console.log("ADD REVIEW STAR RATING OUT OF BOUNDS ERROR: " + reviewData.starRating);
         errorsFound = true;
     }
 
     if (reviewData.costRating < 0 || reviewData.costRating > 4) {
-        // console.log("ADD REVIEW COST RATING OUT OF BOUNDS ERROR: " + reviewData.costRating);
         errorsFound = true;
     }
 
     if (!Number.isInteger(reviewData.starRating) || !Number.isInteger(reviewData.costRating)) {
-        // console.log("ADD REVIEW STAR/COST RATING NOT AN INTEGER ERROR: " + reviewData.starRating + "/" + reviewData.costRating);
         errorsFound = true;
     }
 
     if (errorsFound) {
-        resp.status(400);
-        resp.json("Bad Request");
+        Responses.sendResponse(resp, 400);
     } else {
         Auth.getIdByAuthToken(authToken, function(adminId) {
             if (!adminId) {
-                resp.status(401);
-                resp.json("Unauthorized");
+                Responses.sendResponse(resp, 401);
             } else {
                 Review.insert(venueId, adminId, reviewData, function(response) {
-                    resp.status(response.responseCode);
-                    resp.json(response.message);
+                    Responses.sendResponse(resp, response);
                 });
             }
         });
@@ -105,13 +98,11 @@ exports.getUsersReviews = function(req, resp) {
 
     Auth.getIdByAuthToken(authToken, function(loggedInUserId) {
         if (!loggedInUserId) {
-            resp.status(401);
-            resp.json("Unauthorized");
+            Responses.sendResponse(resp, 401);
         } else {
             Review.getManyByUserId(userId, function(result, response) {
-                resp.status(response.responseCode);
                 if (!result) {
-                    resp.json(response.message);
+                    Responses.sendResponse(resp, response);
                 } else {
                     let toSend = [];
                     for (let i = 0; i < result.length; i++) {
@@ -135,7 +126,7 @@ exports.getUsersReviews = function(req, resp) {
                         };
                         toSend.push(newObject);
                     }
-                    resp.json(toSend);
+                    Responses.sendJsonResponse(resp, response, toSend);
                 }
             });
         }

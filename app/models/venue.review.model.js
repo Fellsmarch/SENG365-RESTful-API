@@ -1,5 +1,4 @@
 const db = require("../../config/db");
-const responses = require("../util/util.responses");
 
 /**
  * Retrieves all reviews of a venue by venue id
@@ -15,11 +14,11 @@ exports.getManyByVenueId = function(venueId, done) {
     db.getPool().query(query, venueId, function(err, rows) {
        if (err) {
            console.log("REVIEWS GET MANY BY VENUE ID ERROR:\n" + err);
-           return done(null, responses._500);
+           return done(null, 500);
        } else if (rows.length < 1) {
-           return done(null, responses._404);
+           return done(null, 404);
        } else {
-           return done(rows, responses._200);
+           return done(rows, 200);
        }
     });
 };
@@ -51,27 +50,26 @@ exports.insert = function(venueId, adminId, reviewData, done) {
     db.getPool().query(adminCheckQuery, venueId, function(adminErr, adminRows) {
         if (adminErr) {
             console.log("REVIEW INSERT ADMIN CHECK QUERY ERROR:\n" + adminErr);
-            return done(responses._500);
+            return done(500);
         } else if (adminRows.length >= 1 && adminRows[0]["admin_id"] === adminId) {
-            return done(responses._403);
+            return done(403);
         } else {
             db.getPool().query(authorCheckQuery, [venueId, adminId], function(authorErr, authorRows) {
                if (authorErr) {
                    console.log("REVIEW INSERT AUTHOR CHECK ERROR:\n" + authorErr);
-                   // console.log("QUERY: " + authorErr.sql);
-                   return done(responses._500);
+                   return done(500);
                } else if (authorRows.length >= 1) {
-                   return done(responses._403);
+                   return done(403);
                } else {
                    db.getPool().query(insertQuery, [[values]], function(insertErr) {
                       if (insertErr) {
                           if (insertErr.code === "ER_NO_REFERENCED_ROW_2" || insertErr.code === "ER_NO_REFERENCED_ROW") {
-                              return done(responses._404);
+                              return done(404);
                           }
                           console.log("REVIEW INSERT ERROR:\n" + insertErr);
-                          return done(responses._500);
+                          return done(500);
                       } else {
-                          return done(responses._201);
+                          return done(201);
                       }
                    });
                }
@@ -96,11 +94,11 @@ exports.getManyByUserId = function(userId, done) {
     db.getPool().query(query, userId, function(err, rows) {
         if (err) {
             console.log("REVIEWS GET MANY BY USER ID ERROR:\n" + err);
-            return done(null, responses._500);
+            return done(null, 500);
         } else if (rows.length < 1) {
-            return done(null, responses._404);
+            return done(null, 404);
         } else {
-            return done(rows, responses._200);
+            return done(rows, 200);
         }
     });
 };

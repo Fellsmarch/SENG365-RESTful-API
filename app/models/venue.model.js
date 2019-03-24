@@ -1,5 +1,4 @@
 const db = require("../../config/db");
-const responses = require("../util/util.responses");
 
 /**
  * Retrieves (possibly) multiple venues from the database matching given search parameters
@@ -76,7 +75,6 @@ exports.getMany = function(params, done) {
             console.log("VENUE GET MANY VENUES ERROR: \n" + err);
             return done(null);
         } else {
-            console.log(rows);
             return done(rows);
         }
     });
@@ -121,13 +119,13 @@ exports.insert = function(venueData, adminId, done) {
        if (err) {
            if (err.code === "ER_NO_REFERENCED_ROW_2" || err.code === "ER_NO_REFERENCED_ROW") {
                console.log("VENUE INSERT ERROR CATEGORY ID DOESN'T REFERENCE CORRECTLY");
-               done(null, responses._400);
+               done(null, 400);
            } else {
                console.log("VENUE INSERT ERROR:\n" + err);
-               done(null, responses._500);
+               done(null, 500);
            }
        } else {
-           done(result.insertId, responses._201);
+           done(result.insertId, 201);
        }
     });
 };
@@ -146,32 +144,32 @@ exports.getOne = function(venueId, done) {
     db.getPool().query(venueQuery, venueId, function(venueErr, venueRows) {
         if (venueErr) {
             console.log("VENUE GET ONE ERROR (VENUE QUERY)\n" + venueErr);
-            return done(null, responses._500);
+            return done(null, 500);
         } else if (venueRows.length < 1) {
             console.log("VENUE GET ONE ERROR: VENUE NOT FOUND ERROR");
-            return done(null, responses._404);
+            return done(null, 404);
         } else {
             // console.log(venueRows);
             db.getPool().query(adminQuery, venueRows[0]["venue_id"], function(adminErr, adminRows) {
                 if (adminErr) {
                     console.log("VENUE GET ONE ERROR (ADMIN QUERY)\n" + adminErr);
-                    return done(null, responses._500);
+                    return done(null, 500);
                 } else if (adminRows.length < 1) {
                     console.log("VENUE GET ONE ERROR: ADMIN/USER NOT FOUND ERROR");
-                    return done(null, responses._404);
+                    return done(null, 404);
                 } else {
                     db.getPool().query(categoryQuery, venueRows[0]["category_id"], function(categoryErr, categoryRows) {
                         if (categoryErr) {
                             console.log("VENUE GET ONE ERROR (CATEGORY QUERY)\n" + categoryErr);
-                            return done(null, responses._500);
+                            return done(null, 500);
                         } else if (categoryRows.length < 1) {
                             console.log("VENUE GET ONE ERROR: CATEGORY NOT FOUND ERROR");
-                            return done(null, responses._404);
+                            return done(null, 404);
                         } else {
                             db.getPool().query(photosQuery, venueRows[0]["venue_id"], function(photoErr, photoRows) {
                                 if (photoErr) {
                                     console.log("VENUE GET ONE ERROR (PHOTO QUERY)\n" + photoErr);
-                                    return done(null, responses._500);
+                                    return done(null, 500);
                                 } else {
                                     let toReturn = {
                                         venueRows: venueRows,
@@ -179,7 +177,7 @@ exports.getOne = function(venueId, done) {
                                         categoryRows: categoryRows,
                                         photoRows: photoRows
                                     };
-                                    return done(toReturn, responses._200);
+                                    return done(toReturn, 200);
                                 }
                             });
                         }
@@ -248,22 +246,22 @@ exports.update = function(venueId, adminId, venueData, done) {
     db.getPool().query(authQuery, venueId, function(authErr, authRows) {
         if (authErr) {
             console.log("VENUE UPDATE ERROR CHECK VALID ADMIN & VENUE:\n" + authErr);
-            return done(responses._500);
+            return done(500);
         } else if (authRows.length < 1) {
-            return done(responses._404);
+            return done(404);
         } else {
             if (authRows[0]["admin_id"] !== adminId) {
-                return done(responses._403);
+                return done(403);
             } else {
                 db.getPool().query(updateQuery, values, function(updateErr, updateResult) {
                    if (updateErr) {
                        console.log("VENUE UPDATE ERROR UPDATE VENUE:\n" + updateErr);
                        console.log("SQL WAS: " + updateErr.sql);
-                       return done(responses._500);
+                       return done(500);
                    } else if (updateResult["affectedRows"] < 1) {
-                       return done(responses._500);
+                       return done(500);
                    } else {
-                       return done(responses._200);
+                       return done(200);
                    }
                 });
             }

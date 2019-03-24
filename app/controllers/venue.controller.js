@@ -1,5 +1,7 @@
 const Venue = require("../models/venue.model");
 const Auth = require("../util/util.authorization");
+const Responses = require("../util/util.responses");
+
 
 /**
  * Gets a list of venues that match the given search criteria
@@ -13,7 +15,6 @@ const Auth = require("../util/util.authorization");
  * is missing or invalid
  */
 exports.getVenues = function(req, resp) {
-    //TODO: Change it so latitude/longitude can be 0
     let reqData = {
         startIndex: req.query["startIndex"] || 0,
         count: req.query["count"],
@@ -29,20 +30,17 @@ exports.getVenues = function(req, resp) {
         myLongitude: req.query["myLongitude"]
     };
 
-
     //Start checking
     let errorFound = false;
 
     //Check if sortBy is one of the available values
     if (reqData.sortBy && !(["STAR_RATING", "COST_RATING", "DISTANCE"].includes(reqData.sortBy))) {
-        // console.log("Sort by error");
         errorFound = true;
     }
 
     //Check if sortBy is "DISTANCE" that both myLatitude & myLongitude are present
     if (reqData.sortBy === "DISTANCE") {
         if ((!reqData.myLatitude && reqData.myLatitude !== 0) || (!reqData.myLongitude && reqData.myLongitude !== 0)) {
-            // console.log("SortBy is DISTANCE but either latitude or longitude are missing");
             errorFound = true;
         }
     }
@@ -57,7 +55,6 @@ exports.getVenues = function(req, resp) {
 
     //Check that if either myLatitude or myLongitude is present, the other is also
     if (reqData.myLongitude && (!reqData.myLatitude && reqData.myLatitude !== 0)) {
-        // console.log("Either latitude or longitude is present and the other is missing");
         errorFound = true;
     }
     if (reqData.myLatitude && (!reqData.myLongitude && reqData.myLongitude !== 0)) {
@@ -65,10 +62,7 @@ exports.getVenues = function(req, resp) {
     }
 
     if (errorFound) {
-        // console.log("error found");
-        resp.statusMessage = "Bad Request";
-        resp.status(400);
-        resp.json("Bad Request");
+        Responses.sendResponse(resp, 400);
     } else {
         Venue.getMany(reqData, function(results) {
             if (results != null) {
@@ -108,15 +102,9 @@ exports.getVenues = function(req, resp) {
                     toSend = toSend.slice(reqData.startIndex);
                 }
 
-
-                // console.log(toSend);
-
-                resp.status(200);
-                resp.json(toSend);
+                Responses.sendJsonResponse(resp, 200, toSend);
             } else {
-                resp.statusMessage = "Bad Request";
-                resp.status(400);
-                resp.json("Bad Request");
+                Responses.sendResponse(resp, 400);
             }
         });
     }
@@ -158,22 +146,17 @@ exports.addVenue = function(req, resp) {
     }
 
     if (errorFound) {
-        resp.status(400);
-        resp.json("Bad Request");
+        Responses.sendResponse(resp, 400);
     } else {
         Auth.getIdByAuthToken(authToken, function(adminId) {
             if (!adminId) {
-                resp.status(401);
-                resp.json("Unauthorized");
+                Responses.sendResponse(resp, 401);
             } else {
                 Venue.insert(newVenue, adminId, function(result, response) {
-                    resp.status(response.responseCode);
                     if (!result) {
-                        resp.json(response.message);
+                        Responses.sendResponse(resp, response);
                     } else {
-                        resp.json({
-                            "venueId": result
-                        });
+                        Responses.sendJsonResponse(resp, response, {"venueId": result});
                     }
                 });
             }
@@ -191,13 +174,9 @@ exports.getVenueById = function(req, resp) {
     let venueId = Number(req.params.venueId);
 
     Venue.getOne(venueId, function(result, response) {
-        resp.statusMessage = response.message;
-        resp.status(response.responseCode);
-        // console.log(response);
         if (!result) {
-            resp.json(response.message);
+            Responses.sendResponse(resp, response);
         } else {
-            // console.log(result);
             let toSend = {
                 "venueName": result.venueRows[0]["venue_name"],
                 "admin": {
@@ -225,7 +204,7 @@ exports.getVenueById = function(req, resp) {
                 };
                 toSend.photos.push(toAdd);
             }
-            resp.json(toSend);
+            Responses.sendJsonResponse(resp, response, toSend);
         }
     });
 };
@@ -256,8 +235,7 @@ exports.editVenue = function(req, resp) {
 
     Auth.getIdByAuthToken(authToken, function(adminId) {
         if (!adminId) {
-            resp.status(401);
-            resp.json("Unauthorized");
+            Responses.sendResponse(resp, 401);
         } else {
             let changesFound = false;
             for (let key in venueData) {
@@ -268,12 +246,10 @@ exports.editVenue = function(req, resp) {
 
             if (!changesFound || (venueData.latitude && (venueData.latitude < -90 || venueData.latitude > 90)) ||
                 (venueData.longitude && (venueData.longitude < -180 || venueData.longitude > 180))) {
-                resp.status(400);
-                resp.json("Bad Request");
+                Responses.sendResponse(resp, 400);
             } else {
                 Venue.update(venueId, adminId, venueData, function (response) {
-                    resp.status(response.responseCode);
-                    resp.json(response.message);
+                    Responses.sendResponse(resp, response);
                 });
             }
         }
@@ -287,17 +263,15 @@ exports.editVenue = function(req, resp) {
  */
 exports.getCategories = function(req, resp) {
     Venue.getCategories(function(result) {
-        let toReturn = [];
+        let toSend = [];
 
         for (let i = 0; i < result.length; i++) {
-            toReturn.push({
+            toSend.push({
                 "categoryId": result[i]["category_id"],
                 "categoryName": result[i]["category_name"],
                 "categoryDescription": result[i]["category_description"]
             });
         }
-        resp.statusMessage = "OK";
-        resp.status(200);
-        resp.send(toReturn);
+        Responses.sendJsonResponse(resp, 200, toSend);
     });
 };

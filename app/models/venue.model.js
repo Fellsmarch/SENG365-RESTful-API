@@ -7,12 +7,16 @@ const responses = require("../util/util.responses");
  * @param done The callback function
  */
 exports.getMany = function(params, done) {
+    let myLat = params.myLatitude || 0;
+    let myLong = params.myLongitude || 0;
+
     let values = [];
+    let photoQuery = "(SELECT venue_id AS p_venue_id, photo_filename FROM VenuePhoto WHERE is_primary = 1)";
     let distance = "(6371 * acos (" +
-        "cos(radians(" + params.myLatitude + "))" +
+        "cos(radians(" + myLat + "))" +
         "* cos(radians(V.latitude))" +
-        "* cos(radians(V.longitude) - radians(" + params.myLongitude + "))" +
-        "+ sin(radians(" + params.myLatitude + "))" +
+        "* cos(radians(V.longitude) - radians(" + myLong + "))" +
+        "+ sin(radians(" + myLat + "))" +
         "* sin(radians(V.latitude))" +
         ") ) AS distance ";
     let modeQuery = "(SELECT venue_id as m_venue_id, max(mode_cost_rating) as mode_cost_rating " +
@@ -23,8 +27,8 @@ exports.getMany = function(params, done) {
                         "JOIN Review ON venue_id = reviewed_venue_id " +
                         "JOIN " + modeQuery + "M ON venue_id = m_venue_id " +
                         "GROUP BY venue_id)";
-    let query = "SELECT *, "  + distance + "FROM Venue V LEFT JOIN " + averagesQuery + " R ON V.venue_id = r_venue_id" +
-        " JOIN VenuePhoto VP ON VP.venue_id = V.venue_id";
+    let query = "SELECT *, "  + distance + "FROM Venue V LEFT JOIN " + averagesQuery + " R ON V.venue_id = r_venue_id " +
+        "LEFT JOIN " + photoQuery + " P ON V.venue_id = p_venue_id";
 
     if (params.city) {
         values.push(params.city);
@@ -72,6 +76,7 @@ exports.getMany = function(params, done) {
             console.log("VENUE GET MANY VENUES ERROR: \n" + err);
             return done(null);
         } else {
+            console.log(rows);
             return done(rows);
         }
     });

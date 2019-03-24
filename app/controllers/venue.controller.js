@@ -29,6 +29,7 @@ exports.getVenues = function(req, resp) {
         myLongitude: req.query["myLongitude"]
     };
 
+
     //Start checking
     let errorFound = false;
 
@@ -63,9 +64,6 @@ exports.getVenues = function(req, resp) {
         errorFound = true;
     }
 
-    if (!reqData.myLatitude) reqData.myLatitude = 0;
-    if (!reqData.myLongitude) reqData.myLongitude = 0;
-
     if (errorFound) {
         // console.log("error found");
         resp.statusMessage = "Bad Request";
@@ -75,6 +73,7 @@ exports.getVenues = function(req, resp) {
         Venue.getMany(reqData, function(results) {
             if (results != null) {
                 let toSend = [];
+
                 for (let i = 0; i < results.length; i++) {
                     let row = results[i];
                     let newObject = {

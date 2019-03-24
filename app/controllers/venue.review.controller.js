@@ -100,7 +100,6 @@ exports.addReview = function(req, resp) {
  * user requesting reviews from; 404 if the user was not in the database
  */
 exports.getUsersReviews = function(req, resp) {
-    //TODO: Add actual get for primary photo filename
     let userId = req.params.userId;
     let authToken = req.headers["x-authorization"];
 
@@ -131,7 +130,7 @@ exports.getUsersReviews = function(req, resp) {
                                 "categoryName": row["category_name"],
                                 "city": row["city"],
                                 "shortDescription": row["short_description"],
-                                "primaryPhoto": null
+                                "primaryPhoto": row["photo_filename"]
                             }
                         };
                         toSend.push(newObject);

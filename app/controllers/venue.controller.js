@@ -13,7 +13,6 @@ const Auth = require("../util/util.authorization");
  * is missing or invalid
  */
 exports.getVenues = function(req, resp) {
-    //TODO: Still need to get photos filename
     //TODO: Change it so latitude/longitude can be 0
     let reqData = {
         startIndex: req.query["startIndex"] || 0,
@@ -41,7 +40,7 @@ exports.getVenues = function(req, resp) {
 
     //Check if sortBy is "DISTANCE" that both myLatitude & myLongitude are present
     if (reqData.sortBy === "DISTANCE") {
-        if (!reqData.myLatitude || !reqData.myLongitude) {
+        if ((!reqData.myLatitude && reqData.myLatitude !== 0) || (!reqData.myLongitude && reqData.myLongitude !== 0)) {
             // console.log("SortBy is DISTANCE but either latitude or longitude are missing");
             errorFound = true;
         }
@@ -56,8 +55,11 @@ exports.getVenues = function(req, resp) {
     }
 
     //Check that if either myLatitude or myLongitude is present, the other is also
-    if ((reqData.myLongitude && !reqData.myLatitude) || (reqData.myLatitude && !reqData.myLongitude)) {
+    if (reqData.myLongitude && (!reqData.myLatitude && reqData.myLatitude !== 0)) {
         // console.log("Either latitude or longitude is present and the other is missing");
+        errorFound = true;
+    }
+    if (reqData.myLatitude && (!reqData.myLongitude && reqData.myLongitude !== 0)) {
         errorFound = true;
     }
 
@@ -76,21 +78,22 @@ exports.getVenues = function(req, resp) {
                 for (let i = 0; i < results.length; i++) {
                     let row = results[i];
                     let newObject = {
-                        "venueId": row.venue_id,
-                        "venueName": row.venue_name,
-                        "categoryId": row.category_id,
-                        "city": row.city,
-                        "shortDescription": row.short_description,
-                        "latitude": row.latitude,
-                        "longitude": row.longitude,
-                        "meanStarRating": row.average_star_rating,
-                        "modeCostRating": row.mode_cost_rating,
-                        "primaryPhoto": null,
-                        "distance": row.distance
+                        "venueId": row["venue_id"],
+                        "venueName": row["venue_name"],
+                        "categoryId": row["category_id"],
+                        "city": row["city"],
+                        "shortDescription": row["short_description"],
+                        "latitude": row["latitude"],
+                        "longitude": row["longitude"],
+                        "meanStarRating": row["average_star_rating"],
+                        "modeCostRating": row["mode_cost_rating"],
+                        "primaryPhoto": row["photo_filename"],
+                        "distance": row["distance"]
                     };
 
                     //TODO: What if they put in 0?
-                    if (!(reqData.myLatitude && reqData.myLongitude)) {
+                    if (!((reqData.myLatitude || reqData.myLatitude === 0) &&
+                            (reqData.myLongitude || reqData.myLongitude ===0))) {
                         delete newObject["distance"];
                     }
                     toSend.push(newObject);

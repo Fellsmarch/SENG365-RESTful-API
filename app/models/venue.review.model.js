@@ -63,7 +63,7 @@ exports.insert = function(venueId, adminId, reviewData, done) {
                } else if (authorRows.length >= 1) {
                    return done(responses._403);
                } else {
-                   db.getPool().query(insertQuery, [[values]], function(insertErr, insertResult) {
+                   db.getPool().query(insertQuery, [[values]], function(insertErr) {
                       if (insertErr) {
                           if (insertErr.code === "ER_NO_REFERENCED_ROW_2" || insertErr.code === "ER_NO_REFERENCED_ROW") {
                               return done(responses._404);
@@ -86,10 +86,10 @@ exports.insert = function(venueId, adminId, reviewData, done) {
  * @param done The callback function
  */
 exports.getManyByUserId = function(userId, done) {
-    //TODO: Add actual get for primary photo filename
     let query = "SELECT * FROM Review " +
         "JOIN User ON user_id = review_author_id " +
-        "JOIN Venue ON reviewed_venue_id = venue_id " +
+        "JOIN Venue V ON reviewed_venue_id = V.venue_id " +
+        "JOIN VenuePhoto VP ON VP.venue_id = V.venue_id " +
         "WHERE user_id = ? " +
         "ORDER BY time_posted DESC";
 

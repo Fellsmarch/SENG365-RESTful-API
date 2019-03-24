@@ -3,6 +3,8 @@ const Pass = require("../util/util.password");
 const Auth = require("../util/util.authorization");
 const Check = require("../util/util.checking");
 const Crypto = require("crypto");
+const Responses = require("../util/util.responses");
+
 
 /**
  * Registers a new user
@@ -22,21 +24,14 @@ exports.create = function(req, resp) {
     Check.checkNotEmpty(userData.concat(password), function(errorsFound) {
         Check.checkEmail(userData[1], function(emailErrors) {
             if (errorsFound || emailErrors) {
-                resp.statusMessage = "Bad Request";
-                resp.status(400);
-                // resp.json("All required fields present: " + errorsFound + ". Email errors found: " + emailErrors);
-                resp.json("Bad Request");
-             } else {
+                Responses.sendResponse(resp, 400);
+            } else {
                 for (let i = 0; i < userData.length; i++) userData[i] = userData[i].toString();
                 User.insert(userData.concat(Pass.hashPassword(password)), function(result, response) { //Adding the hashed password here to avoid weird async errors
-                    resp.statusMessage = response.message;
-                    resp.status(response.responseCode);
                     if (result == null) {
-                        resp.json(response.message);
+                        Responses.sendResponse(resp, response);
                     } else {
-                        resp.json({
-                            "userId": result
-                        });
+                        Responses.sendJsonResponse(resp, response, {"userId": result});
                     }
                 });
             }
@@ -61,9 +56,7 @@ exports.login = function(req, resp) {
     let usingUsername = null;
 
     if((!username && !email) || !password) {
-        resp.statusMessage = "Bad Request";
-        resp.status(400);
-        resp.json("Bad Request");
+        Responses.sendResponse(resp, 400);
     } else {
         if (username) {
             data = username;
@@ -74,13 +67,10 @@ exports.login = function(req, resp) {
         }
 
         User.login(data, usingUsername, authToken, Pass.hashPassword(password), function(result, response) {
-            resp.statusMessage = response.message;
-            resp.status(response.responseCode);
             if (result == null) {
-                // resp.json("Error while performing SQL query")
-                resp.json(response.message);
+                Responses.sendResponse(resp, response);
             } else {
-                resp.json({
+                Responses.sendJsonResponse(resp, response, {
                     "userId": result,
                     "token": authToken
                 });
@@ -97,25 +87,15 @@ exports.login = function(req, resp) {
 exports.logout = function(req, resp) {
     let authToken = req.headers["x-authorization"];
 
-    if (authToken) {
-        Auth.getIdByAuthToken(authToken, function(userId) {
-           if (userId) {
-                Auth.removeAuthTokenById(userId, function(result, response) {
-                    resp.statusMessage = response.message;
-                    resp.status(response.responseCode);
-                    resp.json(response.message);
-                });
-           } else {
-               resp.statusMessage = "Unauthorized";
-               resp.status(401);
-               resp.json("Unauthorized");
-           }
-        });
-    } else {
-        resp.statusMessage = "Unauthorized";
-        resp.status(401);
-        resp.json("Unauthorized");
-    }
+    Auth.getIdByAuthToken(authToken, function(userId) {
+       if (userId) {
+            Auth.removeAuthTokenById(userId, function(result, response) {
+                Responses.sendResponse(resp, response);
+            });
+       } else {
+           Responses.sendResponse(resp, 401);
+       }
+    });
 };
 
 /**
@@ -128,22 +108,20 @@ exports.getById = function(req, resp) {
     let id = Number(req.params.userId);
 
     User.getOneById(id, function(result, response) {
-        resp.statusMessage = response.message;
-        resp.status(response.responseCode);
         if (result == null) {
-            resp.json(response.message);
+            Responses.sendResponse(resp, response);
         } else {
             let toSend = {
-                "username" : result.username,
-                "email": result.email,
-                "givenName": result.given_name,
-                "familyName": result.family_name
+                "username" : result["username"],
+                "email": result["email"],
+                "givenName": result["given_name"],
+                "familyName": result["family_name"]
             };
             Auth.getIdByAuthToken(req.headers["x-authorization"], function(requestingUser) {
                 if (requestingUser !== id || requestingUser == null) {
                     delete toSend["email"];
                 }
-                resp.json(toSend);
+                Responses.sendJsonResponse(resp, response, toSend);
             });
         }
     });
@@ -169,47 +147,30 @@ exports.update = function(req, resp) {
 
     if (userData.givenName === "" || userData.familyName === "" || typeof userData.password == "number" ||
         (!userData.givenName && !userData.familyName && !userData.password)) {
-        resp.statusMessage = "Bad Request";
-        resp.status(400);
-        resp.json("Bad Request");
-        return;
+        Responses.sendResponse(resp, 400);
     }
 
     if (userData.password) {
         userData.password = Pass.hashPassword(userData.password);
     }
 
-    User.getOneById(id, function(result, _) {
+    User.getOneById(id, function(result) {
         if (result) {
-            if (authToken) {
-                Auth.getIdByAuthToken(authToken, function(requestingUser) {
-                    if (requestingUser) {
-                        if (id === requestingUser) {
-                            User.update(id, userData, function(response) {
-                                resp.statusMessage = response.message;
-                                resp.status(response.responseCode);
-                                resp.json(response.message);
-                            });
-                        } else {
-                            resp.statusMessage = "Forbidden";
-                            resp.status(403);
-                            resp.json("Forbidden");
-                        }
+            Auth.getIdByAuthToken(authToken, function(requestingUser) {
+                if (requestingUser) {
+                    if (id === requestingUser) {
+                        User.update(id, userData, function(response) {
+                            Responses.sendResponse(resp, response);
+                        });
                     } else {
-                        resp.statusMessage = "Internal Server Error";
-                        resp.status(500);
-                        resp.json("Internal Server Error");
+                        Responses.sendResponse(resp, 403);
                     }
-                });
-            } else {
-                resp.statusMessage = "Unauthorized";
-                resp.status(401);
-                resp.json("Unauthorized")
-            }
+                } else {
+                    Responses.sendResponse(resp, 401);
+                }
+            });
         } else {
-            resp.statusMessage = "Not Found";
-            resp.status(404);
-            resp.json("Not Found");
+            Responses.sendResponse(resp, 404);
         }
     });
 };

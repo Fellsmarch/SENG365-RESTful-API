@@ -16,10 +16,16 @@ exports._404 = {responseCode: 404, message: "Not Found"};
 exports._500 = {responseCode: 500, message: "Internal Server Error"};
 
 exports.sendResponse = function(resp, responseCode) {
-    // resp.status(response.responseCode);
-    // resp.json(response.message);
     if (!resp.headersSent) {
         resp.sendStatus(responseCode);
+        resp.end();
+    }
+};
+
+exports.sendJsonResponse = function(resp, responseCode, json) {
+    if (!resp.headersSent) {
+        resp.status(responseCode);
+        resp.json(json);
         resp.end();
     }
 };

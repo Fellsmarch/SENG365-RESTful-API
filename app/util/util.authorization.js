@@ -1,5 +1,4 @@
 const db = require("../../config/db");
-const responses = require("./util.responses");
 
 /**
  * Finds a userId given an auth token
@@ -17,7 +16,7 @@ exports.getIdByAuthToken = function(authToken, callbackFunc) {
         } else if (rows.length < 1) {
             return callbackFunc(null);
         } else {
-            return callbackFunc(rows[0].user_id);
+            return callbackFunc(rows[0]["user_id"]);
         }
     });
 };
@@ -33,11 +32,11 @@ exports.removeAuthTokenById = function(userId, callBackFunc) {
     db.getPool().query(query, userId, function(err, result) {
         if (err) {
             console.log("AUTHORIZATION REMOVE AUTH TOKEN BY ID ERROR: \n" + err);
-            return callBackFunc(null, responses._500);
+            return callBackFunc(null, 500);
         } else if (result.affectedRows < 1) {
-            return callBackFunc(null, responses._500);
+            return callBackFunc(null, 500);
         } else {
-            return callBackFunc(true, responses._200);
+            return callBackFunc(true, 200);
         }
     });
 };

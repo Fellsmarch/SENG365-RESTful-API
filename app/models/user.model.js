@@ -1,5 +1,4 @@
 const db = require("../../config/db");
-const responses = require("../util/util.responses");
 
 /**
  * Inserts a new user into the database
@@ -12,11 +11,9 @@ exports.insert = function(userData, done) {
     db.getPool().query(query, values, function(err, result) {
         if (err) {
             console.log("USER INSERT ERROR: \n" + err);
-            return done(null, responses._400);
+            return done(null, 400);
         } else {
-            // console.log("USER INSERT SUCCESS (result): " + result);
-            // console.log("USER INSERT SUCCESS (result.insertId): " + result.insertId);
-            return done(result.insertId, responses._201);
+            return done(result.insertId, 201);
         }
     });
 };
@@ -34,24 +31,22 @@ exports.login = function(data, usingUsername, authToken, password, done) {
     let query = "UPDATE User SET auth_token = ? WHERE ";
     if (usingUsername) query += "username = ?";
     else query += "email = ?";
-    // console.log("Query: " + query);
-    // console.log(data);
 
     db.getPool().query(query, values, function(err, result) {
         if (err) {
             console.log("USER LOGIN ERROR: \n" + err);
-            return done(null, responses._400);
+            return done(null, 500);
         } else if (result.affectedRows < 1) {
-            return done(null, responses._400);
+            return done(null, 400);
         } else {
             findByUsernameOrEmail(data, usingUsername, function(userId) {
                 if (userId != null) {
                     checkPassword(userId, password, function(passwordGood) {
-                        if (passwordGood) return done(userId, responses._200);
-                        else return done(null, responses._400);
+                        if (passwordGood) return done(userId, 200);
+                        else return done(null, 400);
                     });
                 } else {
-                    return done(null, responses._400);
+                    return done(null, 400);
                 }
             });
         }
@@ -68,11 +63,11 @@ exports.getOneById = function(userId, done) {
     db.getPool().query(query, userId, function (err, rows) {
         if (err) {
             console.log("USER GET ONE BY ID ERROR: \n" + err);
-            return done(null, responses._500);
+            return done(null, 500);
         } else if (rows.length < 1) {
-            return done(null, responses._404);
+            return done(null, 404);
         } else {
-            return done(rows[0], responses._200);
+            return done(rows[0], 200);
         }
     });
 };
@@ -110,11 +105,11 @@ exports.update = function(userId, userData, done) {
     db.getPool().query(query, values, function(err, result) {
         if (err) {
             console.log("USER UPDATE/PATCH USER ERROR: \n" + err);
-            return done(responses._500);
+            return done(500);
         } else if (result.affectedRows < 1) {
-            return done(responses._500);
+            return done(500);
         } else {
-            return done(responses._200);
+            return done(200);
         }
     });
 };

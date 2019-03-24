@@ -1,5 +1,4 @@
 const db = require("../../config/db");
-const responses = require("../util/util.responses");
 
 /**
  * Changes a user's photo or puts a photo into that user's row
@@ -15,20 +14,20 @@ exports.saveUserPhoto = function(filename, userId, done) {
     db.getPool().query(existingPhotoQuery, userId, function(err, rows) {
         if (err) {
             console.log("USER PHOTO SAVE USER PHOTO CHECK PHOTO FILENAME EXISTS ERROR:\n" + err);
-            return done(responses._500);
+            return done(500);
         } else if (rows.length < 1) {
-            return done(responses._400);
+            return done(400);
         } else {
             existingPhoto = rows[0]["photo"] != null;
 
-            db.getPool().query(updateQuery, [filename, userId], function(err, result) {
+            db.getPool().query(updateQuery, [filename, userId], function(err) {
                 if (err) {
                     console.log("USER PHOTO SAVE USER PHOTO UPDATE PHOTO FILENAME ERROR:\n" + err);
-                    return done(responses._500);
+                    return done(500);
                 } else if (existingPhoto) {
-                    return done(responses._200);
+                    return done(200);
                 } else {
-                    return done(responses._201);
+                    return done(201);
                 }
             });
         }
@@ -43,12 +42,12 @@ exports.saveUserPhoto = function(filename, userId, done) {
 exports.deleteUserPhoto = function(userId, done) {
     let query = "UPDATE User SET profile_photo_filename = NULL WHERE user_id = ?";
 
-    db.getPool().query(query, userId, function(err, result) {
+    db.getPool().query(query, userId, function(err) {
         if (err) {
             console.log("USER PHOTO DELETE USER PHOTO ERROR:\n" + err);
-            return done(responses._500);
+            return done(500);
         } else {
-            return done(responses._200);
+            return done(200);
         }
     });
 };

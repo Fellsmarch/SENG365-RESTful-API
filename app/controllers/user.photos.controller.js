@@ -17,14 +17,11 @@ exports.getUserPhoto = function(req, resp) {
 
     User.getOneById(userId, function(user, response) {
         if (!user) {
-            resp.status(response.responseCode);
-            resp.json(response.message);
+            Responses.sendResponse(resp, response);
         } else {
             let filename = user["profile_photo_filename"];
             if (!filename) {
-                // Responses.sendResponse(resp, Responses._404);
-                resp.status(404);
-                resp.json("Not Found");
+                Responses.sendResponse(resp, 404);
             } else {
                 let suffix = filename.substring(filename.length - 3);
                 let contentType;
@@ -38,8 +35,7 @@ exports.getUserPhoto = function(req, resp) {
                 fs.readFile(photoDir + filename, function(err, data) {
                     if (err) {
                         console.log("USER PHOTO GET USER PHOTO READ FILE ERROR:\n" + err);
-                        resp.status(500);
-                        resp.json("Internal Server Error");
+                        Responses.sendResponse(resp, 500);
                     } else {
                         resp.writeHead(200, {"Content-Type": contentType});
                         resp.write(data);
@@ -67,22 +63,18 @@ exports.setUserPhoto = function(req, resp) {
     let userId = Number(req.params.userId);
 
     if (imageData.length === 0) {
-        resp.status(400);
-        resp.json("Bad Request");
+        Responses.sendResponse(resp, 400);
     } else {
         Auth.getIdByAuthToken(authToken, function(authorizedUser) {
             if (!authorizedUser) {
-                resp.status(401);
-                resp.json("Unauthorized");
+                Responses.sendResponse(resp, 401);
             } else {
                 User.getOneById(userId, function (rows, response) {
                     if (!rows) {
-                        resp.status(response.responseCode);
-                        resp.json(response.message);
+                        Responses.sendResponse(resp, response);
                     } else {
                         if (authorizedUser !== userId) {
-                            resp.status(403);
-                            resp.json("Forbidden");
+                            Responses.sendResponse(resp, 403);
                         } else {
                             let filename = Photos.generateFilename();
 
@@ -97,19 +89,16 @@ exports.setUserPhoto = function(req, resp) {
                                         console.log("USER PHOTOS ERROR WRITING FILE:\n" + err);
                                     } else {
                                         UserPhotos.saveUserPhoto(filename, userId, function(response) {
-                                            resp.status(response.responseCode);
-                                            resp.json(response.message);
+                                            Responses.sendResponse(resp, response);
                                         });
                                     }
                                 });
                             } else {
-                                resp.status(400);
-                                resp.json("Bad Request");
+                                Responses.sendResponse(resp, 400);
                             }
                         }
                     }
                 });
-
             }
         });
     }
@@ -129,30 +118,26 @@ exports.deleteUserPhoto = function(req, resp) {
 
     Auth.getIdByAuthToken(authToken, function(authorizedId) {
        if (!authorizedId) {
-           resp.status(401);
-           resp.json("Unauthorized");
+           Responses.sendResponse(resp, 401);
        } else {
            User.getOneById(userId, function (User, response) {
                if (!User) {
-                   resp.status(response.responseCode);
-                   resp.json(response.message);
+                   Responses.sendResponse(resp, response);
                } else {
                    if (authorizedId !== userId) {
-                       resp.status(403);
-                       resp.json("Forbidden");
+                       Responses.sendResponse(resp, 403);
                    } else {
                        let filename = User["profile_photo_filename"];
                        if (filename == null) {
                            resp.status(404);
-                           resp.json("Not Found");
+                           Responses.sendResponse(resp, 404);
                        } else {
                            UserPhotos.deleteUserPhoto(userId, function (response) {
                                 fs.unlink(photoDir + filename, function(err) {
                                     if (err) {
                                         console.log("USER PHOTO ERROR DELETING FILE:\n" + err);
                                     } else {
-                                        resp.status(response.responseCode);
-                                        resp.json(response.message);
+                                        Responses.sendResponse(resp, response);
                                     }
                                 });
                            });

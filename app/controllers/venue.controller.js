@@ -90,7 +90,6 @@ exports.getVenues = function(req, resp) {
                         "distance": row["distance"]
                     };
 
-                    //TODO: What if they put in 0?
                     if (!((reqData.myLatitude || reqData.myLatitude === 0) &&
                             (reqData.myLongitude || reqData.myLongitude ===0))) {
                         delete newObject["distance"];
